@@ -1,0 +1,6 @@
+{
+  "name": "RAVAN INFRA-X ULTRA",
+  "description": "Production-grade, high-speed infrastructure inventory and server fingerprinting tool optimized for Termux (Android) and low-bandwidth environments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
