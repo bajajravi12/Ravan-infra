@@ -7,10 +7,12 @@ from settings import load_settings, save_settings
 from scanner import Scanner
 from cidr import generate_ips
 from file_parser import parse_file
-from utils import detect_target_type
+from utils import detect_target_type, reverse_dns
 from ui import show_banner, show_menu, console, print_live
 from rich.prompt import Prompt
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn
+from rich.table import Table
+from rich.panel import Panel
 
 def run_scan(target_list, settings, total=0):
     scanner = Scanner(settings)
@@ -19,15 +21,15 @@ def run_scan(target_list, settings, total=0):
     found = 0
     
     with Progress(
-        SpinnerColumn(),
+        SpinnerColumn(spinner_name="dots"),
         TextColumn("[progress.description]{task.description}"),
-        BarColumn(bar_width=None),
+        BarColumn(bar_width=None, complete_style="bold green", finished_style="bold blue"),
         TaskProgressColumn(),
         TimeElapsedColumn(),
         console=console,
         expand=True
     ) as progress:
-        task = progress.add_task("[cyan]Scanning...", total=total if total > 0 else None)
+        task = progress.add_task("[bold cyan]Hunting Bug Hosts...", total=total if total > 0 else None)
         
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
             futures = {executor.submit(scanner.scan, t): t for t in target_list}
@@ -38,8 +40,39 @@ def run_scan(target_list, settings, total=0):
                     print_live(result)
                 progress.update(task, advance=1)
                 
-    console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found} responding targets.")
-    time.sleep(2)
+    console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found} responding hosts.")
+    Prompt.ask("\n[bold yellow]Press ENTER to return to menu[/bold yellow]")
+
+def view_results():
+    RESULTS_DIR = "results"
+    if not os.path.exists(RESULTS_DIR):
+        console.print("[bold red]No scan results found yet![/bold red]")
+        time.sleep(2)
+        return
+        
+    files = [f for f in os.listdir(RESULTS_DIR) if f.endswith(".txt")]
+    if not files:
+        console.print("[bold red]No scan results found yet![/bold red]")
+        time.sleep(2)
+        return
+
+    while True:
+        console.clear()
+        show_banner()
+        console.print("[bold cyan]SCAN RESULTS LOG[/bold cyan]")
+        for i, f in enumerate(files, 1):
+            console.print(f"{i}. {f}")
+        console.print(f"{len(files)+1}. Back")
+        
+        choice = Prompt.ask("\nSelect file to view", default=str(len(files)+1))
+        if choice.isdigit() and 1 <= int(choice) <= len(files):
+            file_path = os.path.join(RESULTS_DIR, files[int(choice)-1])
+            with open(file_path, 'r') as f:
+                content = f.read()
+            console.print(Panel(content, title=f"[bold green]{files[int(choice)-1]}[/bold green]"))
+            Prompt.ask("\n[bold yellow]Press ENTER to go back[/bold yellow]")
+        else:
+            break
 
 def handle_settings(settings):
     while True:
@@ -74,7 +107,7 @@ def main():
         show_banner()
         show_menu()
         
-        choice = Prompt.ask("\nSelect option", choices=["1", "2", "3", "4", "5"])
+        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7"])
         
         if choice == "1":
             target = Prompt.ask("Enter Domain or IP")
@@ -83,12 +116,14 @@ def main():
         elif choice == "2":
             cidr = Prompt.ask("Enter CIDR (e.g. 1.1.1.0/24)")
             console.print("[yellow]Preparing scan (Memory Optimized)...[/yellow]")
-            # For progress bar to work we need total, but for huge CIDR we can just use 0 as total if we don't want to calculate it.
-            # However, calculation is fast for CIDR.
             from ipaddress import ip_network
-            net = ip_network(cidr.strip(), strict=False)
-            total_ips = net.num_addresses
-            run_scan(generate_ips(cidr), settings, total=total_ips)
+            try:
+                net = ip_network(cidr.strip(), strict=False)
+                total_ips = net.num_addresses
+                run_scan(generate_ips(cidr), settings, total=total_ips)
+            except:
+                console.print("[bold red]Invalid CIDR![/bold red]")
+                time.sleep(2)
             
         elif choice == "3":
             path = Prompt.ask("Enter file path")
@@ -107,9 +142,19 @@ def main():
                 time.sleep(2)
                 
         elif choice == "4":
+            ip = Prompt.ask("Enter IP for Reverse DNS")
+            result = reverse_dns(ip)
+            console.print(f"\n[bold green]IP:[/bold green] {ip}")
+            console.print(f"[bold green]Domain:[/bold green] {result}")
+            Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]")
+
+        elif choice == "5":
+            view_results()
+
+        elif choice == "6":
             handle_settings(settings)
             
-        elif choice == "5":
+        elif choice == "7":
             console.print("[bold yellow]Exiting...[/bold yellow]")
             sys.exit()
 

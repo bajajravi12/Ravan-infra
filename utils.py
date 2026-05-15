@@ -1,5 +1,6 @@
 import re
 import ipaddress
+import socket
 
 def detect_target_type(target):
     target = target.strip()
@@ -23,6 +24,12 @@ def detect_target_type(target):
         return 'domain'
     
     return 'unknown'
+
+def reverse_dns(ip):
+    try:
+        return socket.gethostbyaddr(ip)[0]
+    except:
+        return "Not Found"
 
 def clean_url(target):
     if not target.startswith(('http://', 'https://')):
