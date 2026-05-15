@@ -39,7 +39,7 @@ class Scanner:
             # Non-RC Compatible: 200, 101, 301, 302 are prime targets
             # We accept a wide range but focus on visibility
             if resp.status_code in [200, 201, 204, 301, 302, 307, 308, 400, 401, 403, 404]:
-                infra_type, color = identify_infra(resp.headers)
+                infra_type, color, method = identify_infra(resp.headers)
                 
                 try:
                     ip = socket.gethostbyname(domain)
@@ -53,10 +53,11 @@ class Scanner:
                     "color": color,
                     "status": resp.status_code,
                     "server": resp.headers.get('Server', 'Unknown'),
-                    "port": port
+                    "port": port,
+                    "method": method
                 }
                 
-                save_result(infra_type, f"{domain}:{port} | {ip} | {resp.status_code}", self.settings['save_results'])
+                save_result(infra_type, f"{domain}:{port} | {ip} | {resp.status_code} | {method}", self.settings['save_results'])
                 return result
         except:
             pass
@@ -67,7 +68,8 @@ class Scanner:
         if not domain:
             return None
             
-        ports = [80, 443, 8080]
+        # Expanded HTTP/CDN/Proxy Ports
+        ports = [80, 443, 2052, 2053, 2082, 2083, 2086, 2087, 2095, 2096, 8080, 81, 8443, 8880]
         results = []
         
         # Scan ports individually

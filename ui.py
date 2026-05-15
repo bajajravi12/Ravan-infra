@@ -25,15 +25,16 @@ def show_menu():
     table.add_column("Key", style="bold yellow")
     table.add_column("Option", style="bold white")
     
-    table.add_row("➔ [1]", "SINGLE DOMAIN/IP SCAN")
-    table.add_row("➔ [2]", "CIDR RANGE SCAN (ULTRA)")
-    table.add_row("➔ [3]", "FILE BULK SCAN (AUTO)")
-    table.add_row("➔ [4]", "IP ➔ DOMAIN LOOKUP")
-    table.add_row("➔ [5]", "BROWSE LOGGED RESULTS")
-    table.add_row("➔ [6]", "SYSTEM SETTINGS")
-    table.add_row("➔ [7]", "EXIT PROGRAM")
+    table.add_row("🔥 [1]", "[bold green]SINGLE BUG SCAN[/bold green]")
+    table.add_row("🚀 [2]", "[bold cyan]CIDR RANGE HUNT[/bold cyan]")
+    table.add_row("📦 [3]", "[bold blue]BULK RECON (FILE)[/bold blue]")
+    table.add_row("🎯 [4]", "[bold magenta]HOST ANALYZER (BUG METHOD)[/bold magenta]")
+    table.add_row("🔍 [5]", "[bold bright_white]REVERSE DNS LOOKUP[/bold bright_white]")
+    table.add_row("📂 [6]", "[bold yellow]BROWSE LOGS (SAVED)[/bold yellow]")
+    table.add_row("⚙️ [7]", "[bold white]CONFIGURATION[/bold white]")
+    table.add_row("❌ [8]", "[bold red]EXIT PROGRAM[/bold red]")
     
-    console.print(Panel(table, title="[bold magenta]『 MAIN CONTROL PANEL 』[/bold magenta]", border_style="bold cyan", border_style_attr=True))
+    console.print(Panel(table, title="[bold red]┏[/bold red][bold white] RAVAN CONTROL PANEL [/bold white][bold red]┓[/bold red]", border_style="bold green", padding=(1, 1)))
 
 def print_live(result):
     if not result:
@@ -41,8 +42,10 @@ def print_live(result):
     # Result can be a list of results for multiple ports
     if isinstance(result, list):
         for res in result:
-            text = f"[bold green]LIVE[/bold green] [white]{res['target']}[/white] | [bold yellow]{res['ip']}[/bold yellow] | [bold {res['color']}]{res['type']}[/bold {res['color']}] | {res['status']}"
+            method_str = f" [bold yellow]({res.get('method', 'HTTP')})[/bold yellow]"
+            text = f"[bold green]LIVE[/bold green] [white]{res['target']}[/white] | [bold yellow]{res['ip']}[/bold yellow] | [bold {res['color']}]{res['type']}[/bold {res['color']}] | {res['status']}{method_str}"
             console.print(text)
     else:
-        text = f"[bold green]LIVE[/bold green] [white]{result['target']}[/white] | [bold yellow]{result['ip']}[/bold yellow] | [bold {result['color']}]{result['type']}[/bold {result['color']}] | {result['status']}"
+        method_str = f" [bold yellow]({result.get('method', 'HTTP')})[/bold yellow]"
+        text = f"[bold green]LIVE[/bold green] [white]{result['target']}[/white] | [bold yellow]{result['ip']}[/bold yellow] | [bold {result['color']}]{result['type']}[/bold {result['color']}] | {result['status']}{method_str}"
         console.print(text)

@@ -10,7 +10,7 @@ from file_parser import parse_file
 from utils import detect_target_type, reverse_dns
 from ui import show_banner, show_menu, console, print_live
 from rich.prompt import Prompt
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn, MofNCompleteColumn, TimeRemainingColumn
 from rich.table import Table
 from rich.panel import Panel
 
@@ -21,15 +21,16 @@ def run_scan(target_list, settings, total=0):
     found = 0
     
     with Progress(
-        SpinnerColumn(spinner_name="dots"),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(bar_width=None, complete_style="bold green", finished_style="bold blue"),
+        SpinnerColumn(spinner_name="earth"),
+        TextColumn("[bold magenta]{task.description}"),
+        BarColumn(bar_width=None, complete_style="bold green", finished_style="bold cyan"),
+        MofNCompleteColumn(),
         TaskProgressColumn(),
-        TimeElapsedColumn(),
+        TimeRemainingColumn(),
         console=console,
         expand=True
     ) as progress:
-        task = progress.add_task("[bold cyan]Hunting Bug Hosts...", total=total if total > 0 else None)
+        task = progress.add_task("[bold red]『 HUNTER ACTIVE 』[/bold red]", total=total if total > 0 else None)
         
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
             futures = {executor.submit(scanner.scan, t): t for t in target_list}
@@ -107,7 +108,7 @@ def main():
         show_banner()
         show_menu()
         
-        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7"])
+        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7", "8"])
         
         if choice == "1":
             target = Prompt.ask("Enter Domain or IP")
@@ -142,19 +143,35 @@ def main():
                 time.sleep(2)
                 
         elif choice == "4":
+            target = Prompt.ask("Enter Target to Analyze")
+            console.print(f"\n[bold cyan]Analyzing {target}...[/bold cyan]")
+            scanner = Scanner(settings)
+            res = scanner.scan(target)
+            if res:
+                console.print("\n[bold green]ANALYSIS COMPLETE[/bold green]")
+                if isinstance(res, list):
+                    for r in res:
+                        console.print(f" Port: [yellow]{r['port']}[/yellow] | IP: [green]{r['ip']}[/green] | Method: [bold cyan]{r['method']}[/bold cyan]")
+                else:
+                    console.print(f" IP: [green]{res['ip']}[/green] | Method: [bold cyan]{res['method']}[/bold cyan]")
+            else:
+                console.print("[bold red]Host not responding or invalid.[/bold red]")
+            Prompt.ask("\n[bold yellow]Press ENTER to return[/bold yellow]")
+
+        elif choice == "5":
             ip = Prompt.ask("Enter IP for Reverse DNS")
             result = reverse_dns(ip)
             console.print(f"\n[bold green]IP:[/bold green] {ip}")
             console.print(f"[bold green]Domain:[/bold green] {result}")
             Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]")
 
-        elif choice == "5":
+        elif choice == "6":
             view_results()
 
-        elif choice == "6":
+        elif choice == "7":
             handle_settings(settings)
             
-        elif choice == "7":
+        elif choice == "8":
             console.print("[bold yellow]Exiting...[/bold yellow]")
             sys.exit()
 
