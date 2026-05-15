@@ -15,25 +15,25 @@ def show_banner():
 [bold cyan]██╔══██╗██║▄▄ ██║[/bold cyan]
 [bold blue]██║  ██║╚██████╔╝[/bold blue]
 [bold magenta]╚═╝  ╚═╝ ╚══▀▀═╝[/bold magenta]
-[bold gradient(0,255,100,255,255,0)]RAVAN INFRA-X ULTRA[/bold gradient]
-[bold white]— EXTREME BUG HOST HUNTER —[/bold white]
+[bold red]R[/bold red][bold yellow]A[/bold yellow][bold green]V[/bold green][bold cyan]A[/bold cyan][bold blue]N[/bold blue] [bold magenta]I[/bold magenta][bold red]N[/bold red][bold yellow]F[/bold yellow][bold green]R[/bold green][bold cyan]A[/bold cyan][bold blue]-[/bold blue][bold magenta]X[/bold magenta] [bold red]U[/bold red][bold yellow]L[/bold yellow][bold green]T[/bold green][bold cyan]R[/bold cyan][bold blue]A[/bold blue]
+[bold white]⚡ THE ULTIMATE BUG HOST HUNTER ⚡[/bold white]
     """
-    console.print(Panel.fit(banner, border_style="bold magenta", shadow=True))
+    console.print(Panel.fit(banner, border_style="bold green", subtitle="[bold yellow]v3.0 - STABLE[/bold yellow]"))
 
 def show_menu():
     table = Table(show_header=False, box=None, padding=(0, 2))
-    table.add_column("Key", style="bold green")
+    table.add_column("Key", style="bold yellow")
     table.add_column("Option", style="bold white")
     
-    table.add_row("[1]", "SINGLE TARGET SCAN")
-    table.add_row("[2]", "CIDR RANGE SCAN")
-    table.add_row("[3]", "FILE SCAN (AUTO-DETECT)")
-    table.add_row("[4]", "IP TO DOMAIN (REVERSE DNS)")
-    table.add_row("[5]", "VIEW SCANNED RESULTS")
-    table.add_row("[6]", "SETTINGS")
-    table.add_row("[7]", "EXIT")
+    table.add_row("➔ [1]", "SINGLE DOMAIN/IP SCAN")
+    table.add_row("➔ [2]", "CIDR RANGE SCAN (ULTRA)")
+    table.add_row("➔ [3]", "FILE BULK SCAN (AUTO)")
+    table.add_row("➔ [4]", "IP ➔ DOMAIN LOOKUP")
+    table.add_row("➔ [5]", "BROWSE LOGGED RESULTS")
+    table.add_row("➔ [6]", "SYSTEM SETTINGS")
+    table.add_row("➔ [7]", "EXIT PROGRAM")
     
-    console.print(Panel(table, title="[bold cyan]CONTROL CENTER[/bold cyan]", border_style="bold blue"))
+    console.print(Panel(table, title="[bold magenta]『 MAIN CONTROL PANEL 』[/bold magenta]", border_style="bold cyan", border_style_attr=True))
 
 def print_live(result):
     if not result:
