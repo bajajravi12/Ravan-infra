@@ -5,7 +5,7 @@ CONFIG_FILE = "config.json"
 
 DEFAULT_SETTINGS = {
     "threads": 400,
-    "timeout": 3,
+    "timeout": 5,
     "retries": 0,
     "save_results": True
 }

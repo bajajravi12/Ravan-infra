@@ -14,12 +14,13 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskPr
 from rich.table import Table
 from rich.panel import Panel
 
-def run_scan(target_list, settings, total=0, session_file=None):
+def run_scan(target_list, settings, total=0, session_file=None, force_show=False, manual_ports=None):
     scanner = Scanner(settings, session_file=session_file)
     found = 0
     
-    # Calculate real total for progress bar (targets * ports)
-    num_ports = len(scanner.ports)
+    # Use manual ports if provided, otherwise scanner defaults
+    active_ports = manual_ports if manual_ports else scanner.ports
+    num_ports = len(active_ports)
     
     if total > 0:
         real_total = total * num_ports
@@ -50,10 +51,10 @@ def run_scan(target_list, settings, total=0, session_file=None):
                     try:
                         scan_ports = [int(parts[1])]
                     except:
-                        scan_ports = scanner.ports
+                        scan_ports = active_ports
                 else:
                     domain = target.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0].strip()
-                    scan_ports = scanner.ports
+                    scan_ports = active_ports
 
                 if not domain:
                     progress.update(task, advance=num_ports)
@@ -66,7 +67,7 @@ def run_scan(target_list, settings, total=0, session_file=None):
                 if result:
                     found += 1
                     progress.update(task, found=found)
-                    print_live(result)
+                    print_live(result, force_show=force_show)
                 progress.update(task, advance=1)
                 
     console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found} responding hosts.")
@@ -156,11 +157,36 @@ def handle_settings(settings):
             break
         save_settings(settings)
 
+def get_manual_ports():
+    ports_input = Prompt.ask("Enter Ports (e.g. 80,443,8080) or blank for default")
+    if not ports_input.strip():
+        return None
+    try:
+        # Handle comma separated
+        if ',' in ports_input:
+            return [int(p.strip()) for p in ports_input.split(',')]
+        # Handle range
+        if '-' in ports_input:
+            start, end = map(int, ports_input.split('-'))
+            return list(range(start, end + 1))
+        # Single port
+        return [int(ports_input.strip())]
+    except Exception as e:
+        console.print(f"[bold red]Invalid port input: {e}. Using defaults.[/bold red]")
+        return None
+
 def main():
     settings = load_settings()
 
     while True:
-        console.clear()
+        try:
+            if os.name == 'nt':
+                os.system('cls')
+            else:
+                os.system('clear')
+        except:
+            console.clear()
+            
         show_banner()
         show_menu()
         
@@ -168,10 +194,12 @@ def main():
         
         if choice == "1":
             target = Prompt.ask("Enter Domain or IP")
-            run_scan([target], settings, total=1)
+            p = get_manual_ports()
+            run_scan([target], settings, total=1, force_show=True, manual_ports=p)
             
         elif choice == "2":
             cidr = Prompt.ask("Enter CIDR (e.g. 1.1.1.0/24)")
+            p = get_manual_ports()
             console.print("[yellow]Preparing scan (Memory Optimized)...[/yellow]")
             from ipaddress import ip_network
             try:
@@ -179,7 +207,7 @@ def main():
                 session_file = f"{clean_cidr}.txt"
                 net = ip_network(cidr.strip(), strict=False)
                 total_ips = net.num_addresses
-                run_scan(generate_ips(cidr), settings, total=total_ips, session_file=session_file)
+                run_scan(generate_ips(cidr), settings, total=total_ips, session_file=session_file, manual_ports=p)
             except Exception as e:
                 console.print(f"[bold red]Invalid CIDR: {e}[/bold red]")
                 time.sleep(2)
@@ -187,6 +215,7 @@ def main():
         elif choice == "3":
             path = Prompt.ask("Enter file path")
             if os.path.exists(path):
+                p = get_manual_ports()
                 def target_generator():
                     raw_targets = parse_file(path)
                     for rt in raw_targets:
@@ -201,24 +230,17 @@ def main():
                 # Note: This reads the generator once, which is slow for huge files. 
                 # Better to just use None total if it's too big, but let's try to keep it simple.
                 session_file = "bughosts_results.txt"
-                run_scan(target_generator(), settings, session_file=session_file)
+                run_scan(target_generator(), settings, session_file=session_file, manual_ports=p)
             else:
                 console.print("[bold red]File not found![/bold red]")
                 time.sleep(2)
                 
         elif choice == "4":
             target = Prompt.ask("Enter Target to Analyze")
+            p = get_manual_ports()
             console.print(f"\n[bold cyan]Analyzing {target}...[/bold cyan]")
-            scanner = Scanner(settings)
-            results = scanner.scan(target)
-            if results:
-                console.print("\n[bold green]ANALYSIS COMPLETE[/bold green]")
-                for r in results:
-                    from ui import show_hit_panel
-                    show_hit_panel(r)
-            else:
-                console.print("[bold red]Host not responding or invalid.[/bold red]")
-            Prompt.ask("\n[bold yellow]Press ENTER to return[/bold yellow]")
+            # For analyzer, we specifically want to see details
+            run_scan([target], settings, total=1, force_show=True, manual_ports=p)
 
         elif choice == "5":
             ip = Prompt.ask("Enter IP for Reverse DNS")

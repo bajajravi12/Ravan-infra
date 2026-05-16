@@ -41,43 +41,59 @@ import datetime
 def show_hit_panel(res):
     now = datetime.datetime.now().strftime("%H:%M:%S")
     
+    border_style = "bold red" if res['status'] == "SSL_ERR" else "bold green"
+    title = f"[bold red]⚠ SSL ERROR [{now}][/bold red]" if res['status'] == "SSL_ERR" else f"[bold green]✓ HIT [{now}][/bold green]"
+    
     table = Table(show_header=False, box=None, padding=(0, 1))
     table.add_column("Key", style="bold cyan", width=12)
     table.add_column("Value", style="white")
     
-    table.add_row("Target", f"[bold yellow]{res['target']}[/bold yellow]")
-    table.add_row("IP", res['ip'])
-    table.add_row("Infra", f"[bold {res.get('color', 'white')}]{res['type']}[/bold {res.get('color', 'white')}]")
-    if res.get('server'):
-        table.add_row("Server", res['server'])
-    table.add_row("Proxy", res.get('proxy', 'Direct'))
-    table.add_row("Status", f"HTTP {res['status']}")
-    table.add_row("Signal", f"[bold green]{res['signal']}[/bold green]")
-    table.add_row("TLS", res.get('tls', 'Disabled'))
+    target_val = f"[bold yellow]{res['target']}[/bold yellow]"
+    table.add_row("Proxy", target_val)
+    
+    server_val = res.get('server', 'Unknown')
+    if res.get('type') != "UNKNOWN":
+        server_val = f"{res['type']} {server_val}"
+    table.add_row("Server", server_val)
+    
+    status_code = res['status']
+    if status_code == 101:
+        status_text = f"HTTP/1.1 101 [bold red]Switching Protocols[/bold red]"
+    elif status_code == "SSL_ERR":
+        status_text = f"[bold red]SSL Handshake Failure[/bold red]"
+    else:
+        status_text = f"HTTP/1.1 {status_code}"
+    
+    table.add_row("Status", status_text)
+    
+    if res.get('proxy'):
+        table.add_row("Method", f"[bold cyan]{res.get('method', 'GET')}[/bold cyan] ({res['proxy']})")
     
     panel = Panel(
         table,
-        title=f"[bold green]✓ HIT [{now}][/bold green]",
-        border_style="bold green",
+        title=title,
+        border_style=border_style,
         expand=False
     )
     console.print(panel)
 
-def print_live(result):
+def print_live(result, force_show=False):
     if not result:
         return
     
     # Live rendering for normal responses + HIT panels for interesting ones
     if isinstance(result, list):
         for res in result:
-            if res.get('high_signal'):
+            is_err = res.get('status') == "SSL_ERR"
+            if res.get('high_signal') or force_show or is_err:
                 show_hit_panel(res)
             else:
                 color = res.get('color', 'white')
                 text = f"[bold green][LIVE][/bold green] [white]{res['target']}[/white] | [bold yellow]{res['ip']}[/bold yellow] | [bold {color}]{res['type']}[/bold {color}] | {res['status']}"
                 console.print(text)
     else:
-        if result.get('high_signal'):
+        is_err = result.get('status') == "SSL_ERR"
+        if result.get('high_signal') or force_show or is_err:
             show_hit_panel(result)
         else:
             color = result.get('color', 'white')
