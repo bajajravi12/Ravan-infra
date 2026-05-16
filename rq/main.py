@@ -86,8 +86,8 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
     Prompt.ask("\n[bold yellow]Press ENTER to return to menu[/bold yellow]")
 
 def view_results():
-    RESULTS_DIR = "results"
-    if not os.path.exists(RESULTS_DIR):
+    from .output import RESULTS_DIR
+    if not RESULTS_DIR.exists():
         console.print("[bold red]No scan results found yet![/bold red]")
         time.sleep(2)
         return

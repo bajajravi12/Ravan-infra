@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rq-tool"
-version = "1.0.0"
+version = "3.0.0"
 description = "The Ultimate Bug Host Hunter Tool"
 readme = "README.md"
 authors = [{ name = "Ravan" }]
