@@ -3,8 +3,8 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rq-tool"
-version = "3.0.0"
+name = "rqrv"
+version = "3.5.1"
 description = "The Ultimate Bug Host Hunter Tool"
 readme = "README.md"
 authors = [{ name = "Ravan" }]
@@ -18,4 +18,4 @@ dependencies = [
 ]
 
 [project.scripts]
-rq = "rq.main:main"
+rqrv = "rqrv.main:main"

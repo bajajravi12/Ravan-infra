@@ -1,5 +1,5 @@
 import sys
-from rq.main import main
+from rqrv.main import main
 
 if __name__ == "__main__":
     main()

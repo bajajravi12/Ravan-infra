@@ -2,10 +2,10 @@ import os
 from setuptools import setup, find_packages
 
 setup(
-    name="rq-tool",
-    version="3.0.0",
+    name="rqrv",
+    version="3.5.1",
     author="Ravan",
-    description="The Ultimate Bug Host Hunter Tool (RQ)",
+    description="The Ultimate Bug Host Hunter Tool (RQRV)",
     long_description=open("README.md").read() if os.path.exists("README.md") else "",
     long_description_content_type="text/markdown",
     packages=find_packages(),
@@ -19,7 +19,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "rq=rq.main:main",
+            "rqrv=rqrv.main:main",
         ],
     },
     classifiers=[

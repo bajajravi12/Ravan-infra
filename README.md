@@ -1,43 +1,42 @@
-# RAVAN INFRA-X ULTRA
+# RAVAN INFRA-X ULTRA (RQRV)
 
 Production-grade, high-speed infrastructure inventory and server fingerprinting tool.
 
-## Installation
+## 🚀 Easy Installation (Only 2 Commands)
 
-The easiest way to install **RQ** is via pip:
+Ab aap is tool ko sirf 2 simple commands se install aur run kar sakte hain:
 
+**1. Install Tool:**
 ```bash
-pip install rq-tool
+pip install git+https://github.com/bajajravi12/Ravan-infra.git
 ```
 
-After installation, you can launch the tool from anywhere by simply typing:
-
+**2. Run Tool:**
 ```bash
-rq
+rqrv
 ```
+
+---
 
 ## Features
-- **🔥 Parallel Hunter Engine**: Simultaneously scans multiple domains AND multiple ports (80, 443, 2052, etc.) for max speed.
-- **🚀 Ultra-Fast Concurrency**: Thread-optimized architecture specifically tuned for high-performance scanning.
-- **🎯 Smart Infra Fingerprinting**: Detects Cloudflare, CloudFront, Akamai, Fastly, AWS, Nginx, Apache, and more.
-- **🛠️ Bug Method Suggester**: Automatically suggests payloads (WS/gRPC, CDN/SSL, DNS-Tunnel) based on server response.
-- **🔍 Reverse DNS LOOKUP**: Built-in tool to resolve IP addresses back to their hostnames.
-- **📦 CIDR & Bulk Power**: Memory-efficient generators for processing millions of targets.
-- **📂 Auto-Logger**: Real-time logging to organize all discovered hosts.
-- **🌐 IP to CIDR Finder**: Automatically find the CIDR range for any given IP.
+- **🔥 Parallel Hunter Engine**: Simultaneously scans multiple domains AND multiple ports.
+- **🎯 Smart Infra Fingerprinting**: Detects Cloudflare, Akamai, AWS, Nginx, etc.
+- **🛠️ Bug Method Suggester**: Automatically suggests payloads (WS/gRPC, CDN/SSL).
+- **🔍 Reverse DNS & CIDR**: Built-in tools for deep network analysis.
+- **📂 Auto-Logger**: Real-time logging to organized files in `~/.rqrv/results`.
 
-## Direct Installation (Termux/Linux)
+## Use Cases
+- **Single Scan**: Quick analysis of a single host.
+- **Bulk Scan**: Scan a list of domains from a file.
+- **CIDR Scan**: Scan an entire IP range.
+- **Reverse DNS**: Find hostnames for a list of IPs.
 
-1. **Update Repository:**
-   ```bash
-   pkg update && pkg upgrade -y
-   ```
-
-2. **Install RQ:**
-   ```bash
-   pip install rq-tool
-   root@termux:~# rq
-   ```
+## Note for Termux Users
+Agar aap Termux use kar rahe hain, toh pehle ye command zaroor chalayein:
+```bash
+pkg update && pkg upgrade -y && pkg install python git -y
+```
+Uske baad upar di gayi **2 Commands** se install karein.
 
 ## Usage
 - **Single Scan**: Quick analysis of a single host.
