@@ -64,7 +64,7 @@ def identify_infra(headers, status_code):
         signal = "Endpoint Responding"
 
     # Specific "Interesting" combinations
-    if high_signal or (cdn != "UNKNOWN" and status_code == 101):
+    if high_signal or (cdn != "UNKNOWN" and status_code in [101, 200, 403]) or status_code == 101:
         high_signal = True
 
     return {

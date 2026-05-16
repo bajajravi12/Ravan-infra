@@ -45,15 +45,15 @@ def show_hit_panel(res):
     table.add_column("Key", style="bold cyan", width=12)
     table.add_column("Value", style="white")
     
-    table.add_row("Target", res['target'])
-    table.add_row("IP", f"[bold yellow]{res['ip']}[/bold yellow]")
+    table.add_row("Target", f"[bold yellow]{res['target']}[/bold yellow]")
+    table.add_row("IP", res['ip'])
     table.add_row("Infra", f"[bold {res.get('color', 'white')}]{res['type']}[/bold {res.get('color', 'white')}]")
-    table.add_row("Server", res.get('server', 'Unknown'))
+    if res.get('server'):
+        table.add_row("Server", res['server'])
     table.add_row("Proxy", res.get('proxy', 'Direct'))
     table.add_row("Status", f"HTTP {res['status']}")
     table.add_row("Signal", f"[bold green]{res['signal']}[/bold green]")
     table.add_row("TLS", res.get('tls', 'Disabled'))
-    table.add_row("Confidence", res.get('confidence', 'Medium'))
     
     panel = Panel(
         table,
@@ -66,11 +66,20 @@ def show_hit_panel(res):
 def print_live(result):
     if not result:
         return
-    # Only show HIT panel for high signal results to avoid terminal spam
+    
+    # Live rendering for normal responses + HIT panels for interesting ones
     if isinstance(result, list):
         for res in result:
             if res.get('high_signal'):
                 show_hit_panel(res)
+            else:
+                color = res.get('color', 'white')
+                text = f"[bold green][LIVE][/bold green] [white]{res['target']}[/white] | [bold yellow]{res['ip']}[/bold yellow] | [bold {color}]{res['type']}[/bold {color}] | {res['status']}"
+                console.print(text)
     else:
         if result.get('high_signal'):
             show_hit_panel(result)
+        else:
+            color = result.get('color', 'white')
+            text = f"[bold green][LIVE][/bold green] [white]{result['target']}[/white] | [bold yellow]{result['ip']}[/bold yellow] | [bold {color}]{result['type']}[/bold {color}] | {result['status']}"
+            console.print(text)

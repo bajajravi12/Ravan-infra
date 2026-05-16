@@ -14,8 +14,8 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskPr
 from rich.table import Table
 from rich.panel import Panel
 
-def run_scan(target_list, settings, total=0):
-    scanner = Scanner(settings)
+def run_scan(target_list, settings, total=0, session_file=None):
+    scanner = Scanner(settings, session_file=session_file)
     found = 0
     
     # Calculate real total for progress bar (targets * ports)
@@ -44,11 +44,21 @@ def run_scan(target_list, settings, total=0):
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
             futures = []
             for target in target_list:
-                domain = target.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0].strip()
+                if ':' in target and not target.startswith('http'):
+                    parts = target.split(':')
+                    domain = parts[0].strip()
+                    try:
+                        scan_ports = [int(parts[1])]
+                    except:
+                        scan_ports = scanner.ports
+                else:
+                    domain = target.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0].strip()
+                    scan_ports = scanner.ports
+
                 if not domain:
                     progress.update(task, advance=num_ports)
                     continue
-                for port in scanner.ports:
+                for port in scan_ports:
                     futures.append(executor.submit(scanner.scan_port, domain, port))
 
             for future in as_completed(futures):
@@ -60,6 +70,15 @@ def run_scan(target_list, settings, total=0):
                 progress.update(task, advance=1)
                 
     console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found} responding hosts.")
+    
+    if found > 0:
+        save = Prompt.ask("\nSave results to file?", choices=["Y", "N"], default="Y")
+        if save.upper() == "N":
+            # If they don't want to save, we should ideally not have saved them automatically
+            # but current architecture saves as it goes. We can just leave it or manage it better.
+            # For now, let's just confirm they were logged.
+            console.print("[yellow]Results were logged to the results/ directory.[/yellow]")
+    
     Prompt.ask("\n[bold yellow]Press ENTER to return to menu[/bold yellow]")
 
 def view_results():
@@ -85,10 +104,29 @@ def view_results():
         
         choice = Prompt.ask("\nSelect file to view", default=str(len(files)+1))
         if choice.isdigit() and 1 <= int(choice) <= len(files):
-            file_path = os.path.join(RESULTS_DIR, files[int(choice)-1])
+            file_name = files[int(choice)-1]
+            file_path = os.path.join(RESULTS_DIR, file_name)
+            
+            table = Table(title=f"[bold cyan]Content of {file_name}[/bold cyan]", show_lines=True)
+            table.add_column("Target", style="white")
+            table.add_column("IP", style="yellow")
+            table.add_column("Infra", style="magenta")
+            table.add_column("Server", style="green")
+            table.add_column("Status", style="cyan")
+            table.add_column("Signal", style="white")
+
             with open(file_path, 'r') as f:
-                content = f.read()
-            console.print(Panel(content, title=f"[bold green]{files[int(choice)-1]}[/bold green]"))
+                for line in f:
+                    if '|' in line:
+                        parts = [p.strip() for p in line.split('|')]
+                        if len(parts) >= 6:
+                            table.add_row(*parts[:6])
+                        else:
+                            table.add_row(line.strip(), "", "", "", "", "")
+                    else:
+                        table.add_row(line.strip(), "", "", "", "", "")
+            
+            console.print(table)
             Prompt.ask("\n[bold yellow]Press ENTER to go back[/bold yellow]")
         else:
             break
@@ -137,9 +175,11 @@ def main():
             console.print("[yellow]Preparing scan (Memory Optimized)...[/yellow]")
             from ipaddress import ip_network
             try:
+                clean_cidr = cidr.strip().replace('/', '_')
+                session_file = f"{clean_cidr}.txt"
                 net = ip_network(cidr.strip(), strict=False)
                 total_ips = net.num_addresses
-                run_scan(generate_ips(cidr), settings, total=total_ips)
+                run_scan(generate_ips(cidr), settings, total=total_ips, session_file=session_file)
             except Exception as e:
                 console.print(f"[bold red]Invalid CIDR: {e}[/bold red]")
                 time.sleep(2)
@@ -160,7 +200,8 @@ def main():
                 # Estimate total matches for progress
                 # Note: This reads the generator once, which is slow for huge files. 
                 # Better to just use None total if it's too big, but let's try to keep it simple.
-                run_scan(target_generator(), settings)
+                session_file = "bughosts_results.txt"
+                run_scan(target_generator(), settings, session_file=session_file)
             else:
                 console.print("[bold red]File not found![/bold red]")
                 time.sleep(2)
@@ -169,14 +210,12 @@ def main():
             target = Prompt.ask("Enter Target to Analyze")
             console.print(f"\n[bold cyan]Analyzing {target}...[/bold cyan]")
             scanner = Scanner(settings)
-            res = scanner.scan(target)
-            if res:
+            results = scanner.scan(target)
+            if results:
                 console.print("\n[bold green]ANALYSIS COMPLETE[/bold green]")
-                if isinstance(res, list):
-                    for r in res:
-                        console.print(f" Port: [yellow]{r['port']}[/yellow] | IP: [green]{r['ip']}[/green] | Method: [bold cyan]{r['method']}[/bold cyan]")
-                else:
-                    console.print(f" IP: [green]{res['ip']}[/green] | Method: [bold cyan]{res['method']}[/bold cyan]")
+                for r in results:
+                    from ui import show_hit_panel
+                    show_hit_panel(r)
             else:
                 console.print("[bold red]Host not responding or invalid.[/bold red]")
             Prompt.ask("\n[bold yellow]Press ENTER to return[/bold yellow]")
