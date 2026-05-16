@@ -4,9 +4,9 @@ import os
 CONFIG_FILE = "config.json"
 
 DEFAULT_SETTINGS = {
-    "threads": 200,
-    "timeout": 5,
-    "retries": 1,
+    "threads": 400,
+    "timeout": 3,
+    "retries": 0,
     "save_results": True
 }
 

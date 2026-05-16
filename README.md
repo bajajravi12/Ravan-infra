@@ -3,12 +3,13 @@
 Production-grade, high-speed infrastructure inventory and server fingerprinting tool.
 
 ## Features
-- **Ultra-Fast Engine**: Multithreaded scanning using `ThreadPoolExecutor`.
-- **Smart Detection**: Detects Cloudflare, CloudFront, Akamai, Fastly, AWS, Nginx, Apache, and more.
-- **CIDR Optimized**: Memory-efficient CIDR scanning using Python generators.
-- **Auto-Detect**: Seamlessly parses files containing Domains, IPs, and CIDRs.
-- **Network Optimized**: Low-bandwidth HTTP HEAD requests with smart GET fallback.
-- **Termux Ready**: Optimized for Android (Termux) with a beautiful `rich` terminal UI.
+- **🔥 Parallel Hunter Engine**: Simultaneously scans multiple domains AND multiple ports (80, 443, 2052, etc.) for max speed.
+- **🚀 Ultra-Fast Concurrency**: Thread-optimized architecture specifically tuned for Termux environments.
+- **🎯 Smart Infra Fingerprinting**: Detects Cloudflare, CloudFront, Akamai, Fastly, AWS, Nginx, Apache, and more.
+- **🛠️ Bug Method Suggester**: Automatically suggests payloads (WS/gRPC, CDN/SSL, DNS-Tunnel) based on server response.
+- **🔍 Reverse DNS LOOKUP**: Built-in tool to resolve IP addresses back to their hostnames.
+- **📦 CIDR & Bulk Power**: Memory-efficient generators for processing millions of targets without crashing.
+- **📂 Auto-Logger**: Real-time logging of all discovered hosts to organized text files.
 
 ## Installation (Termux)
 

@@ -25,16 +25,16 @@ def show_menu():
     table.add_column("Key", style="bold yellow")
     table.add_column("Option", style="bold white")
     
-    table.add_row("🔥 [1]", "[bold green]SINGLE BUG SCAN[/bold green]")
-    table.add_row("🚀 [2]", "[bold cyan]CIDR RANGE HUNT[/bold cyan]")
-    table.add_row("📦 [3]", "[bold blue]BULK RECON (FILE)[/bold blue]")
-    table.add_row("🎯 [4]", "[bold magenta]HOST ANALYZER (BUG METHOD)[/bold magenta]")
-    table.add_row("🔍 [5]", "[bold bright_white]REVERSE DNS LOOKUP[/bold bright_white]")
-    table.add_row("📂 [6]", "[bold yellow]BROWSE LOGS (SAVED)[/bold yellow]")
-    table.add_row("⚙️ [7]", "[bold white]CONFIGURATION[/bold white]")
+    table.add_row("🔥 [1]", "[bold green]SINGLE BUG HUNTER[/bold green]")
+    table.add_row("🚀 [2]", "[bold cyan]CIDR RANGE ATTACK[/bold cyan]")
+    table.add_row("📦 [3]", "[bold blue]BULK SCAN (LIST/FILE)[/bold blue]")
+    table.add_row("🎯 [4]", "[bold magenta]METHOD ANALYZER[/bold magenta]")
+    table.add_row("🔍 [5]", "[bold bright_white]REVERSE DNS PRO[/bold bright_white]")
+    table.add_row("📂 [6]", "[bold yellow]VIEW SAVED LOGS[/bold yellow]")
+    table.add_row("⚙️ [7]", "[bold white]HUNTER SETTINGS[/bold white]")
     table.add_row("❌ [8]", "[bold red]EXIT PROGRAM[/bold red]")
     
-    console.print(Panel(table, title="[bold red]┏[/bold red][bold white] RAVAN CONTROL PANEL [/bold white][bold red]┓[/bold red]", border_style="bold green", padding=(1, 1)))
+    console.print(Panel(table, title="[bold red]──『 RAVAN CONTROL CENTER 』──[/bold red]", border_style="bold green", padding=(1, 1)))
 
 def print_live(result):
     if not result:

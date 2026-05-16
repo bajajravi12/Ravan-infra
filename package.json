@@ -1,20 +1,10 @@
 {
   "name": "ravan-infra-x-ultra",
+  "version": "3.0.0",
+  "description": "Extreme Bug Host Hunter for Termux",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-
-  },
-  "devDependencies": {
-    "@types/node": "^22.14.0",
-    
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "build": "echo 'Python project, no build needed'",
+    "start": "echo 'Run via: python main.py'"
   }
 }

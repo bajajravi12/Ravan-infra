@@ -16,10 +16,18 @@ from rich.panel import Panel
 
 def run_scan(target_list, settings, total=0):
     scanner = Scanner(settings)
-    if total == 0 and hasattr(target_list, '__len__'):
-        total = len(target_list)
     found = 0
     
+    # Calculate real total for progress bar (targets * ports)
+    num_ports = len(scanner.ports)
+    
+    if total > 0:
+        real_total = total * num_ports
+    elif isinstance(target_list, list):
+        real_total = len(target_list) * num_ports
+    else:
+        real_total = None # Generator mode
+
     with Progress(
         SpinnerColumn(spinner_name="earth"),
         TextColumn("[bold magenta]{task.description}"),
@@ -30,10 +38,18 @@ def run_scan(target_list, settings, total=0):
         console=console,
         expand=True
     ) as progress:
-        task = progress.add_task("[bold red]『 HUNTER ACTIVE 』[/bold red]", total=total if total > 0 else None)
+        task = progress.add_task("[bold red]『 HUNTER ACTIVE 』[/bold red]", total=real_total)
         
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
-            futures = {executor.submit(scanner.scan, t): t for t in target_list}
+            futures = []
+            for target in target_list:
+                domain = target.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0].strip()
+                if not domain:
+                    progress.update(task, advance=num_ports)
+                    continue
+                for port in scanner.ports:
+                    futures.append(executor.submit(scanner.scan_port, domain, port))
+
             for future in as_completed(futures):
                 result = future.result()
                 if result:
@@ -112,7 +128,7 @@ def main():
         
         if choice == "1":
             target = Prompt.ask("Enter Domain or IP")
-            run_scan([target], settings)
+            run_scan([target], settings, total=1)
             
         elif choice == "2":
             cidr = Prompt.ask("Enter CIDR (e.g. 1.1.1.0/24)")
@@ -122,22 +138,27 @@ def main():
                 net = ip_network(cidr.strip(), strict=False)
                 total_ips = net.num_addresses
                 run_scan(generate_ips(cidr), settings, total=total_ips)
-            except:
-                console.print("[bold red]Invalid CIDR![/bold red]")
+            except Exception as e:
+                console.print(f"[bold red]Invalid CIDR: {e}[/bold red]")
                 time.sleep(2)
             
         elif choice == "3":
             path = Prompt.ask("Enter file path")
             if os.path.exists(path):
-                raw_targets = parse_file(path)
-                final_targets = []
-                for rt in raw_targets:
-                    t_type = detect_target_type(rt)
-                    if t_type == 'cidr':
-                        final_targets.extend(generate_ips(rt))
-                    else:
-                        final_targets.append(rt)
-                run_scan(final_targets, settings)
+                def target_generator():
+                    raw_targets = parse_file(path)
+                    for rt in raw_targets:
+                        t_type = detect_target_type(rt)
+                        if t_type == 'cidr':
+                            for ip in generate_ips(rt):
+                                yield str(ip)
+                        else:
+                            yield rt
+                
+                # Estimate total matches for progress
+                # Note: This reads the generator once, which is slow for huge files. 
+                # Better to just use None total if it's too big, but let's try to keep it simple.
+                run_scan(target_generator(), settings)
             else:
                 console.print("[bold red]File not found![/bold red]")
                 time.sleep(2)
