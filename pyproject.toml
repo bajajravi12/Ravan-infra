@@ -19,7 +19,13 @@ dependencies = [
     "rich",
     "requests",
     "urllib3",
-    "ipaddress",
     "httpx[http2]",
     "ipwhois",
 ]
+
+[project.scripts]
+rq = "rqrv.main:main"
+
+[tool.setuptools]
+packages = ["rqrv"]
+include-package-data = true

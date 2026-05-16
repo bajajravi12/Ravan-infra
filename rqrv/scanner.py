@@ -7,8 +7,8 @@ try:
 except ImportError:
     HAS_HTTPX = False
 
-from detector import identify_infra
-from output import save_result
+from .detector import identify_infra
+from .output import save_result
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 

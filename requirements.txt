@@ -1,6 +1,0 @@
-rich
-requests
-urllib3
-ipaddress
-httpx[http2]
-ipwhois

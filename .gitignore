@@ -1,8 +1,11 @@
-node_modules/
+__pycache__/
+*.pyc
+error.txt
+*.save
+results/
+.rqrv/
+config.json
+*.txt
 build/
 dist/
-coverage/
-.DS_Store
-*.log
-.env*
-!.env.example
+*.egg-info/

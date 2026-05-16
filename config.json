@@ -1,6 +1,0 @@
-{
-  "threads": 200,
-  "timeout": 5,
-  "retries": 1,
-  "save_results": true
-}
