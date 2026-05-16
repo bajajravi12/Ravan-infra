@@ -23,10 +23,3 @@ dependencies = [
     "httpx[http2]",
     "ipwhois",
 ]
-
-[project.scripts]
-rqrv = "rqrv.main:main"
-
-[tool.setuptools]
-packages = ["rqrv"]
-include-package-data = true
