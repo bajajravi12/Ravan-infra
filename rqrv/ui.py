@@ -18,7 +18,7 @@ def show_banner():
 [bold red]R[/bold red][bold yellow]A[/bold yellow][bold green]V[/bold green][bold cyan]A[/bold cyan][bold blue]N[/bold blue] [bold magenta]I[/bold magenta][bold red]N[/bold red][bold yellow]F[/bold yellow][bold green]R[/bold green][bold cyan]A[/bold cyan][bold blue]-[/bold blue][bold magenta]X[/bold magenta] [bold red]U[/bold red][bold yellow]L[/bold yellow][bold green]T[/bold green][bold cyan]R[/bold cyan][bold blue]A[/bold blue]
 [bold white]⚡ THE ULTIMATE BUG HOST HUNTER ⚡[/bold white]
     """
-    console.print(Panel.fit(banner, border_style="bold green", subtitle="[bold yellow]v3.6.2 - STABLE[/bold yellow]"))
+    console.print(Panel.fit(banner, border_style="bold green", subtitle="[bold yellow]v3.6.3 - STABLE[/bold yellow]"))
 
 def show_menu():
     table = Table(show_header=False, box=None, padding=(0, 2))

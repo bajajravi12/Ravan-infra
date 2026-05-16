@@ -3,13 +3,16 @@ from setuptools import setup, find_packages
 
 setup(
     name="rqrv",
-    version="3.6.2",
+    version="3.6.3",
     author="Ravan",
     description="The Ultimate Bug Host Hunter Tool (RQRV)",
     long_description=open("README.md").read() if os.path.exists("README.md") else "",
     long_description_content_type="text/markdown",
-    packages=find_packages(),
+    packages=find_packages(include=["rqrv", "rqrv.*"]),
     include_package_data=True,
+    package_data={
+        "rqrv": ["*.py"],
+    },
     install_requires=[
         "rich",
         "requests",

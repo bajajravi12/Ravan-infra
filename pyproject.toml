@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rqrv"
-version = "3.6.2"
+version = "3.6.3"
 description = "The Ultimate Bug Host Hunter Tool"
 readme = "README.md"
 authors = [{ name = "Ravan" }]
@@ -29,7 +29,6 @@ rqrv = "rqrv.main:main"
 
 [tool.setuptools]
 packages = ["rqrv"]
-include-package-data = true
 
 [tool.setuptools.package-data]
-rqrv = ["*.py"]
+"*" = ["*.py"]

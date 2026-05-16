@@ -32,11 +32,11 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
     with Progress(
         SpinnerColumn(spinner_name="earth"),
         TextColumn("[bold magenta]{task.description}"),
-        TextColumn("[white]{task.fields[current_target]}"),
+        TextColumn(lambda task: f"[white]{task.fields.get('current_target', '')}"),
         BarColumn(bar_width=None, complete_style="bold green", finished_style="bold cyan"),
         MofNCompleteColumn(),
         TaskProgressColumn(),
-        TextColumn("[blue]Found: {task.fields[found]}"),
+        TextColumn(lambda task: f"[blue]Found: {task.fields.get('found', 0)}"),
         TimeRemainingColumn(),
         console=console,
         expand=True
