@@ -2,53 +2,42 @@
 
 Production-grade, high-speed infrastructure inventory and server fingerprinting tool.
 
+## Installation
+
+The easiest way to install **RQ** is via pip:
+
+```bash
+pip install rq-tool
+```
+
+After installation, you can launch the tool from anywhere by simply typing:
+
+```bash
+rq
+```
+
 ## Features
 - **🔥 Parallel Hunter Engine**: Simultaneously scans multiple domains AND multiple ports (80, 443, 2052, etc.) for max speed.
-- **🚀 Ultra-Fast Concurrency**: Thread-optimized architecture specifically tuned for Termux environments.
+- **🚀 Ultra-Fast Concurrency**: Thread-optimized architecture specifically tuned for high-performance scanning.
 - **🎯 Smart Infra Fingerprinting**: Detects Cloudflare, CloudFront, Akamai, Fastly, AWS, Nginx, Apache, and more.
 - **🛠️ Bug Method Suggester**: Automatically suggests payloads (WS/gRPC, CDN/SSL, DNS-Tunnel) based on server response.
 - **🔍 Reverse DNS LOOKUP**: Built-in tool to resolve IP addresses back to their hostnames.
-- **📦 CIDR & Bulk Power**: Memory-efficient generators for processing millions of targets without crashing.
-- **📂 Auto-Logger**: Real-time logging of all discovered hosts to organized text files.
+- **📦 CIDR & Bulk Power**: Memory-efficient generators for processing millions of targets.
+- **📂 Auto-Logger**: Real-time logging to organize all discovered hosts.
+- **🌐 IP to CIDR Finder**: Automatically find the CIDR range for any given IP.
 
-## Installation (Termux)
+## Direct Installation (Termux/Linux)
 
-1. **Update and Upgrade Package Repository:**
-```bash
-pkg update && pkg upgrade -y
-```
+1. **Update Repository:**
+   ```bash
+   pkg update && pkg upgrade -y
+   ```
 
-2. **Install Python and Git:**
-```bash
-pkg install python git -y
-```
-
-3. **Clone the Repository:**
-```bash
-git clone https://github.com/bajajravi12/Ravan-infra
-```
-
-4. **Navigate to Directory:**
-```bash
-cd Ravan-infra
-```
-
-5. **Install Requirements:**
-```bash
-pip install -r requirements.txt
-```
-
-6. **Run the Tool:**
-```bash
-python main.py
-```
-
-## How to Update:
-If you already have the tool installed, use these commands to get the latest version:
-```bash
-cd Ravan-infra
-git pull
-```
+2. **Install RQ:**
+   ```bash
+   pip install rq-tool
+   root@termux:~# rq
+   ```
 
 ## Usage
 - **Single Scan**: Quick analysis of a single host.

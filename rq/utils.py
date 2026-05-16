@@ -35,6 +35,18 @@ def reverse_dns(ip):
     except:
         return "Not Found"
 
+def get_cidr(ip):
+    try:
+        from ipwhois import IPWhois
+        obj = IPWhois(ip)
+        results = obj.lookup_rdap(depth=1)
+        # Try to find the smallest CIDR or the one in the network section
+        if results.get('network') and results['network'].get('cidr'):
+            return results['network']['cidr']
+        return "CIDR not found in WHOIS data"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
 def clean_url(target):
     if not target.startswith(('http://', 'https://')):
         return f"http://{target}"

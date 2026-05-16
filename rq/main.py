@@ -3,12 +3,12 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from settings import load_settings, save_settings
-from scanner import Scanner
-from cidr import generate_ips
-from file_parser import parse_file
-from utils import detect_target_type, reverse_dns
-from ui import show_banner, show_menu, console, print_live
+from .settings import load_settings, save_settings
+from .scanner import Scanner
+from .cidr import generate_ips
+from .file_parser import parse_file
+from .utils import detect_target_type, reverse_dns, get_cidr
+from .ui import show_banner, show_menu, console, print_live
 from rich.prompt import Prompt
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn, MofNCompleteColumn, TimeRemainingColumn
 from rich.table import Table
@@ -31,7 +31,7 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
 
     with Progress(
         SpinnerColumn(spinner_name="earth"),
-        TextColumn("[bold magenta]{task.description}"),
+        TextColumn("[bold magenta]{task.description} {task.fields.get('current_target', '')}"),
         BarColumn(bar_width=None, complete_style="bold green", finished_style="bold cyan"),
         MofNCompleteColumn(),
         TaskProgressColumn(),
@@ -40,10 +40,10 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
         console=console,
         expand=True
     ) as progress:
-        task = progress.add_task("[bold red]『 HUNTER ACTIVE 』[/bold red]", total=real_total, found=0)
+        task = progress.add_task("[bold red]『 HUNTER ACTIVE 』[/bold red]", total=real_total, found=0, current_target="")
         
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
-            futures = []
+            futures_to_target = {}
             for target in target_list:
                 if ':' in target and not target.startswith('http'):
                     parts = target.split(':')
@@ -60,14 +60,17 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
                     progress.update(task, advance=num_ports)
                     continue
                 for port in scan_ports:
-                    futures.append(executor.submit(scanner.scan_port, domain, port))
+                    f = executor.submit(scanner.scan_port, domain, port)
+                    futures_to_target[f] = f"{domain}:{port}"
 
-            for future in as_completed(futures):
+            for future in as_completed(futures_to_target):
                 result = future.result()
+                current_t = futures_to_target[future]
+                progress.update(task, current_target=f"[white]{current_t}[/white]")
                 if result:
                     found += 1
                     progress.update(task, found=found)
-                    print_live(result, force_show=force_show)
+                    print_live(result, force_show=force_show, settings=settings)
                 progress.update(task, advance=1)
                 
     console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found} responding hosts.")
@@ -139,10 +142,12 @@ def handle_settings(settings):
         console.print("[bold white]SETTINGS[/bold white]")
         console.print(f"1. Threads: [yellow]{settings['threads']}[/yellow]")
         console.print(f"2. Timeout: [yellow]{settings['timeout']}s[/yellow]")
-        console.print(f"3. Save Results: [yellow]{settings['save_results']}[/yellow]")
-        console.print("4. Back to Main Menu")
+        console.print(f"3. HTTP/2 Protocol: [yellow]{settings.get('http2', True)}[/yellow]")
+        console.print(f"4. High Signals: [yellow]{', '.join(settings.get('high_signals', []))}[/yellow]")
+        console.print(f"5. Save Results: [yellow]{settings['save_results']}[/yellow]")
+        console.print("6. Back to Main Menu")
         
-        choice = Prompt.ask("\nSelect option", choices=["1", "2", "3", "4"])
+        choice = Prompt.ask("\nSelect option", choices=["1", "2", "3", "4", "5", "6"])
         
         if choice == "1":
             t = Prompt.ask("Enter threads", default=str(settings['threads']))
@@ -151,6 +156,13 @@ def handle_settings(settings):
             to = Prompt.ask("Enter timeout", default=str(settings['timeout']))
             settings['timeout'] = int(to)
         elif choice == "3":
+            settings['http2'] = not settings.get('http2', True)
+        elif choice == "4":
+            console.print("\n[cyan]Enter new high signals separated by comma (e.g. CloudFront, 101, Cloudflare)[/cyan]")
+            val = Prompt.ask("High Signals")
+            if val:
+                settings['high_signals'] = [v.strip() for v in val.split(',')]
+        elif choice == "5":
             settings['save_results'] = not settings['save_results']
         else:
             save_settings(settings)
@@ -190,7 +202,7 @@ def main():
         show_banner()
         show_menu()
         
-        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7", "8"])
+        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9"])
         
         if choice == "1":
             target = Prompt.ask("Enter Domain or IP")
@@ -250,12 +262,20 @@ def main():
             Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]")
 
         elif choice == "6":
-            view_results()
+            ip = Prompt.ask("Enter IP to find CIDR")
+            console.print(f"\n[bold cyan]Fetching WHOIS/RDAP data for {ip}...[/bold cyan]")
+            result = get_cidr(ip)
+            console.print(f"\n[bold green]IP:[/bold green] {ip}")
+            console.print(f"[bold green]CIDR:[/bold green] [bold yellow]{result}[/bold yellow]")
+            Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]")
 
         elif choice == "7":
+            view_results()
+
+        elif choice == "8":
             handle_settings(settings)
             
-        elif choice == "8":
+        elif choice == "9":
             console.print("[bold yellow]Exiting...[/bold yellow]")
             sys.exit()
 

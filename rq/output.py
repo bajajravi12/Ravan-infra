@@ -1,13 +1,16 @@
 import os
+from pathlib import Path
 
-RESULTS_DIR = "results"
+# Use the same base directory as settings
+BASE_DIR = Path.home() / ".rq"
+RESULTS_DIR = BASE_DIR / "results"
 
 def save_result(signal, data, save_enabled=True, infra=None, session_file=None):
     if not save_enabled:
         return
         
-    if not os.path.exists(RESULTS_DIR):
-        os.makedirs(RESULTS_DIR)
+    if not RESULTS_DIR.exists():
+        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
         
     # session_file takes priority for direct logging (requested for CIDR/Bulk)
     if session_file:

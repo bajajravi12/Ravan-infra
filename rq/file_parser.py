@@ -1,5 +1,5 @@
 import os
-from utils import detect_target_type
+from .utils import detect_target_type
 
 def parse_file(file_path):
     if not os.path.exists(file_path):

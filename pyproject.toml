@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rq-tool"
+version = "1.0.0"
+description = "The Ultimate Bug Host Hunter Tool"
+readme = "README.md"
+authors = [{ name = "Ravan" }]
+dependencies = [
+    "rich",
+    "requests",
+    "urllib3",
+    "ipaddress",
+    "httpx[http2]",
+    "ipwhois",
+]
+
+[project.scripts]
+rq = "rq.main:main"

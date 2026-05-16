@@ -6,5 +6,8 @@
   "scripts": {
     "build": "echo 'Python project, no build needed'",
     "start": "echo 'Run via: python main.py'"
+  },
+  "dependencies": {
+    "ipwhois": "^1.0.3"
   }
 }
