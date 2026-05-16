@@ -36,7 +36,8 @@ class Scanner:
 
     def scan_port(self, domain, port):
         # Determine protocol based on port
-        proto = "https://" if port in [443, 2053, 2083, 2087, 2096, 8443] else "http://"
+        is_https = port in [443, 2053, 2083, 2087, 2096, 8443]
+        proto = "https://" if is_https else "http://"
         url = f"{proto}{domain}:{port}"
         
         try:
@@ -50,21 +51,27 @@ class Scanner:
             )
 
             if resp.status_code < 500:
-                infra_type, color, method = identify_infra(resp.headers)
+                infra_info = identify_infra(resp.headers, resp.status_code)
                 ip = self.get_ip(domain)
 
                 result = {
                     "target": f"{domain}:{port}",
                     "ip": ip,
-                    "type": infra_type,
-                    "color": color,
+                    "type": infra_info['infra'],
+                    "color": infra_info['color'],
                     "status": resp.status_code,
-                    "server": resp.headers.get('Server', 'Unknown'),
+                    "server": infra_info['server'],
                     "port": port,
-                    "method": method
+                    "method": infra_info['method'],
+                    "signal": infra_info['signal'],
+                    "high_signal": infra_info.get('high_signal', False),
+                    "proxy": infra_info['proxy'],
+                    "tls": "Enabled" if is_https else "Disabled",
+                    "confidence": "High" if infra_info['infra'] != "UNKNOWN" else "Medium"
                 }
                 
-                save_result(infra_type, f"{domain}:{port} | {ip} | {resp.status_code} | {method}", self.settings['save_results'])
+                output_data = f"{domain}:{port} | {ip} | {infra_info['infra']} | {infra_info['server']} | {resp.status_code} | {infra_info['signal']}"
+                save_result(infra_info['signal'], output_data, self.settings['save_results'])
                 return result
         except:
             pass

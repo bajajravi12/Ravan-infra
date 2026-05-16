@@ -36,16 +36,41 @@ def show_menu():
     
     console.print(Panel(table, title="[bold red]──『 RAVAN CONTROL CENTER 』──[/bold red]", border_style="bold green", padding=(1, 1)))
 
+import datetime
+
+def show_hit_panel(res):
+    now = datetime.datetime.now().strftime("%H:%M:%S")
+    
+    table = Table(show_header=False, box=None, padding=(0, 1))
+    table.add_column("Key", style="bold cyan", width=12)
+    table.add_column("Value", style="white")
+    
+    table.add_row("Target", res['target'])
+    table.add_row("IP", f"[bold yellow]{res['ip']}[/bold yellow]")
+    table.add_row("Infra", f"[bold {res.get('color', 'white')}]{res['type']}[/bold {res.get('color', 'white')}]")
+    table.add_row("Server", res.get('server', 'Unknown'))
+    table.add_row("Proxy", res.get('proxy', 'Direct'))
+    table.add_row("Status", f"HTTP {res['status']}")
+    table.add_row("Signal", f"[bold green]{res['signal']}[/bold green]")
+    table.add_row("TLS", res.get('tls', 'Disabled'))
+    table.add_row("Confidence", res.get('confidence', 'Medium'))
+    
+    panel = Panel(
+        table,
+        title=f"[bold green]✓ HIT [{now}][/bold green]",
+        border_style="bold green",
+        expand=False
+    )
+    console.print(panel)
+
 def print_live(result):
     if not result:
         return
-    # Result can be a list of results for multiple ports
+    # Only show HIT panel for high signal results to avoid terminal spam
     if isinstance(result, list):
         for res in result:
-            method_str = f" [bold yellow]({res.get('method', 'HTTP')})[/bold yellow]"
-            text = f"[bold green]LIVE[/bold green] [white]{res['target']}[/white] | [bold yellow]{res['ip']}[/bold yellow] | [bold {res['color']}]{res['type']}[/bold {res['color']}] | {res['status']}{method_str}"
-            console.print(text)
+            if res.get('high_signal'):
+                show_hit_panel(res)
     else:
-        method_str = f" [bold yellow]({result.get('method', 'HTTP')})[/bold yellow]"
-        text = f"[bold green]LIVE[/bold green] [white]{result['target']}[/white] | [bold yellow]{result['ip']}[/bold yellow] | [bold {result['color']}]{result['type']}[/bold {result['color']}] | {result['status']}{method_str}"
-        console.print(text)
+        if result.get('high_signal'):
+            show_hit_panel(result)

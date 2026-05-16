@@ -34,11 +34,12 @@ def run_scan(target_list, settings, total=0):
         BarColumn(bar_width=None, complete_style="bold green", finished_style="bold cyan"),
         MofNCompleteColumn(),
         TaskProgressColumn(),
+        TextColumn("[blue]Found: {task.fields[found]}"),
         TimeRemainingColumn(),
         console=console,
         expand=True
     ) as progress:
-        task = progress.add_task("[bold red]『 HUNTER ACTIVE 』[/bold red]", total=real_total)
+        task = progress.add_task("[bold red]『 HUNTER ACTIVE 』[/bold red]", total=real_total, found=0)
         
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
             futures = []
@@ -54,6 +55,7 @@ def run_scan(target_list, settings, total=0):
                 result = future.result()
                 if result:
                     found += 1
+                    progress.update(task, found=found)
                     print_live(result)
                 progress.update(task, advance=1)
                 

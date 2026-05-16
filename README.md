@@ -25,12 +25,12 @@ pkg install python git -y
 
 3. **Clone the Repository:**
 ```bash
-git clone https://github.com/bajajravi12/ravan-infra
+git clone https://github.com/bajajravi12/Ravan-infra
 ```
 
 4. **Navigate to Directory:**
 ```bash
-cd ravan-infra
+cd Ravan-infra
 ```
 
 5. **Install Requirements:**
@@ -41,6 +41,13 @@ pip install -r requirements.txt
 6. **Run the Tool:**
 ```bash
 python main.py
+```
+
+## How to Update:
+If you already have the tool installed, use these commands to get the latest version:
+```bash
+cd Ravan-infra
+git pull
 ```
 
 ## Usage
