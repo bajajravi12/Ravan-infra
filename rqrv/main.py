@@ -32,11 +32,11 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
     with Progress(
         SpinnerColumn(spinner_name="earth"),
         TextColumn("[bold magenta]{task.description}"),
-        TextColumn(lambda task: f"[white]{task.fields.get('current_target', '')}"),
+        TextColumn("{task.fields[current_target]}"),
         BarColumn(bar_width=None, complete_style="bold green", finished_style="bold cyan"),
         MofNCompleteColumn(),
         TaskProgressColumn(),
-        TextColumn(lambda task: f"[blue]Found: {task.fields.get('found', 0)}"),
+        TextColumn("[blue]Found: {task.fields[found]}"),
         TimeRemainingColumn(),
         console=console,
         expand=True
@@ -56,7 +56,6 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
                 else:
                     domain = target.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0].strip()
                     scan_ports = active_ports
-Prefix="The Ultimate Bug Host Hunter Tool (RQRV)"
                 if not domain:
                     progress.update(task, advance=num_ports)
                     continue
