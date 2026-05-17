@@ -11,8 +11,14 @@ from .utils import detect_target_type, reverse_dns, get_cidr, reverse_dns_pro
 from .ui import show_banner, show_menu, console, print_live, get_width, custom_prompt
 import json
 import signal
+import threading
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
+from rich.prompt import Prompt
+from rich.table import Table
+from rich.panel import Panel
+from rich.text import Text
 
-SESSION_FILE = os.path.expanduser("~/.rqrv_session.json")
+SESSION_FILE = "session_state.json"
 
 def save_session(state):
     try:
@@ -54,7 +60,7 @@ def detect_txt_files():
                 continue
     return list(set(txt_files))[:15] # Limit to top 15
 
-def run_scan(target_list, settings, total=0, session_file=None, force_show=False, manual_ports=None, start_index=0, state_meta=None):
+def run_scan(target_list, settings, total=0, session_file=None, force_show=False, manual_ports=None, start_index=0, state_meta=None, enable_controls=False):
     scanner = Scanner(settings, session_file=session_file)
     found_count = 0
     seen_hits = set()
@@ -74,7 +80,8 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
     # If resume, adjust progress
     start_advance = start_index * num_ports
     
-    console.print(f"\n[bold yellow]Scan Control: [P] Pause | [R] Resume | [Q] Quit & Save[/bold yellow]")
+    if enable_controls:
+        console.print(f"\n[bold yellow]Scan Control: [P] Pause | [R] Resume | [Q] Quit & Save[/bold yellow]")
 
     # Compact progress for Termux/Mobile
     with Progress(
@@ -89,29 +96,28 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
     ) as progress:
         task = progress.add_task("HUNT", total=real_total, found=0, target="Initializing...", completed=start_advance)
         
-        # Start input thread for controls
-        import threading
-        def control_listener():
-            while not scanner.stop_event.is_set():
-                try:
-                    import sys
-                    import select
-                    if select.select([sys.stdin], [], [], 0.5)[0]:
-                        cmd = sys.stdin.read(1).lower()
-                        if cmd == 'p':
-                            scanner.pause_event.clear()
-                            console.print("\n[bold yellow]⚠ SCAN PAUSED. Press 'R' to Resume.[/bold yellow]")
-                        elif cmd == 'r':
-                            scanner.pause_event.set()
-                            console.print("\n[bold green]▶ SCAN RESUMED.[/bold green]")
-                        elif cmd == 'q':
-                            scanner.stop_event.set()
-                            scanner.pause_event.set()
-                            console.print("\n[bold red]Stopping... Saving Session.[/bold red]")
-                except:
-                    pass
+        if enable_controls:
+            def control_listener():
+                while not scanner.stop_event.is_set():
+                    try:
+                        import sys
+                        import select
+                        if select.select([sys.stdin], [], [], 0.5)[0]:
+                            cmd = sys.stdin.read(1).lower()
+                            if cmd == 'p':
+                                scanner.pause_event.clear()
+                                console.print("\n[bold yellow]⚠ SCAN PAUSED. Press 'R' to Resume.[/bold yellow]")
+                            elif cmd == 'r':
+                                scanner.pause_event.set()
+                                console.print("\n[bold green]▶ SCAN RESUMED.[/bold green]")
+                            elif cmd == 'q':
+                                scanner.stop_event.set()
+                                scanner.pause_event.set()
+                                console.print("\n[bold red]Stopping... Saving Session.[/bold red]")
+                    except:
+                        pass
 
-        threading.Thread(target=control_listener, daemon=True).start()
+            threading.Thread(target=control_listener, daemon=True).start()
 
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
             futures_to_target = {}
@@ -173,7 +179,8 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
                     
                     result = future.result()
                     if result and result.get('status') != "ERROR":
-                        hit_id = result['target']
+                        # Deduplicate by IP:PORT as requested
+                        hit_id = f"{result['ip']}:{result['port']}"
                         if hit_id not in seen_hits:
                             seen_hits.add(hit_id)
                             found_count += 1
@@ -360,7 +367,7 @@ def main():
                 net = ip_network(cidr, strict=False)
                 run_scan(generate_ips(cidr), settings, total=net.num_addresses, 
                          session_file=f"{cidr.replace('/', '_')}.txt", start_index=session['current_index'], 
-                         state_meta=session)
+                         state_meta=session, enable_controls=True)
             elif session['type'] == 'file':
                 path = session['input']
                 def target_generator():
@@ -371,7 +378,7 @@ def main():
                             for ip in generate_ips(rt): yield str(ip)
                         else: yield rt
                 run_scan(target_generator(), settings, session_file="bughosts_results.txt", 
-                         start_index=session['current_index'], state_meta=session)
+                         start_index=session['current_index'], state_meta=session, enable_controls=True)
             # After resume or finish, continue
         else:
             clear_session()
@@ -407,7 +414,7 @@ def main():
                 net = ip_network(cidr.strip(), strict=False)
                 state = {"type": "cidr", "input": cidr.strip(), "current_index": 0, "found_count": 0}
                 save_session(state)
-                run_scan(generate_ips(cidr), settings, total=net.num_addresses, session_file=session_file, manual_ports=p, state_meta=state)
+                run_scan(generate_ips(cidr), settings, total=net.num_addresses, session_file=session_file, manual_ports=p, state_meta=state, enable_controls=True)
             except Exception as e:
                 console.print(f"[bold red]Error: {e}[/bold red]")
                 time.sleep(2)
@@ -443,7 +450,7 @@ def main():
 
                 state = {"type": "file", "input": path, "current_index": start_line, "found_count": 0}
                 save_session(state)
-                run_scan(target_generator(), settings, session_file="bughosts_results.txt", manual_ports=p, start_index=start_line, state_meta=state)
+                run_scan(target_generator(), settings, session_file="bughosts_results.txt", manual_ports=p, start_index=start_line, state_meta=state, enable_controls=True)
             else:
                 console.print("[bold red]File not found![/bold red]")
                 time.sleep(2)

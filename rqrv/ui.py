@@ -78,7 +78,7 @@ def show_hit_panel(res):
     table.add_row("Server", server_val)
     
     if status_code == 101:
-        status_text = f"[bold yellow]HTTP/1.1 101[/bold yellow]"
+        status_text = f"[bold yellow]HTTP 101[/bold yellow]"
     elif status_code == "SSL_ERR":
         status_text = f"[bold red]Handshake Failure[/bold red]"
     else:
@@ -129,12 +129,15 @@ def print_live(result, force_show=False, settings=None):
             infra = res.get('type', 'UNKNOWN')
             status = res.get('status')
             
-            # If not premium but high signal, we already handled it. 
-            # If it's a generic 403/404/SSL_ERR without high signal, ignore it in bulk.
+            # If not force_show, we want to BE VERY STRICT in bulk mode
             if not force_show:
-                boring_codes = [403, 404, 502, 503, 504, 400, "SSL_ERR"]
+                # Silently ignore these common spam/error codes if no special infra detected
+                boring_codes = [403, 404, 502, 503, 504, 400, "SSL_ERR", "TIMEOUT", "RESET", "EOF"]
                 if status in boring_codes and infra == "UNKNOWN":
                     return
+                # If Handshake failure or timeout without special infra, skip
+                if str(status).startswith("SSL") or str(status).startswith("CONN"):
+                    if infra == "UNKNOWN": return
 
             color = res.get('color', 'white')
             proto = res.get('protocol', 'H1')

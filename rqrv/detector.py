@@ -11,9 +11,9 @@ def identify_infra(headers, status_code):
     cdn, color = "UNKNOWN", "bright_black"
 
     # Specific CDN/Proxy Detection
-    if 'cloudflare' in server.lower() or cf_ray or 'cf-cache-status' in headers:
+    if 'cloudflare' in server.lower() or cf_ray or 'cf-cache-status' in headers or 'cdn-cgi' in str(headers).lower():
         cdn, color = "CLOUDFLARE", "magenta"
-    elif 'cloudfront' in via or 'cloudfront' in x_cache or 'x-amz-cf-id' in headers or 'x-amz-cf-pop' in headers:
+    elif 'cloudfront' in via or 'cloudfront' in x_cache or 'x-amz-cf-id' in headers or 'x-amz-cf-pop' in headers or 'server: cloudfront' in str(headers).lower():
         cdn, color = "CLOUDFRONT", "cyan"
     elif 'fastly' in via or 'x-served-by' in headers:
         cdn, color = "FASTLY", "blue"
@@ -35,7 +35,7 @@ def identify_infra(headers, status_code):
         cdn, color = "IIS", "white"
     elif server.lower() == "gws" or "google" in server.lower():
         cdn, color = "GOOGLE", "bright_red"
-    elif via or any(h in headers for h in ['x-forwarded-for', 'forwarded', 'x-real-ip', 'x-proxy-id', 'x-varnish', 'x-squid-error']):
+    elif via or any(h in headers for h in ['x-forwarded-for', 'forwarded', 'x-real-ip', 'x-proxy-id', 'x-varnish', 'x-squid-error', 'alt-svc', 'cf-ray', 'x-cache']):
         cdn, color = "REV-PROXY", "bright_magenta"
     
     # Advanced Method Detection Heuristics
