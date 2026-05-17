@@ -33,15 +33,14 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
     # Compact progress for Termux/Mobile
     with Progress(
         SpinnerColumn(spinner_name="dots"),
-        TextColumn("[bold magenta]SCANNING[/bold magenta]"),
-        BarColumn(bar_width=10, complete_style="green", finished_style="cyan"), # Narrower bar
+        TextColumn("[magenta]HUNTING[/]"),
+        BarColumn(bar_width=8, complete_style="green"), # Even narrower
         MofNCompleteColumn(),
-        TaskProgressColumn(),
-        TextColumn("[blue]HIT: {task.fields[found]}"),
+        TextColumn("[blue]H:{task.fields[found]}"),
         console=console,
-        expand=True
+        expand=False # Don't expand to full width to avoid wrapping
     ) as progress:
-        task = progress.add_task("HUNTING", total=real_total, found=0)
+        task = progress.add_task("HUNT", total=real_total, found=0)
         
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
             futures_to_target = {}
@@ -88,50 +87,6 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
     
     Prompt.ask("\n[bold yellow]Press ENTER to return to menu[/bold yellow]")
 
-def delete_results():
-    from .output import RESULTS_DIR
-    if not RESULTS_DIR.exists():
-        console.print("[bold red]No saved logs to delete![/bold red]")
-        time.sleep(2)
-        return
-        
-    files = [f for f in os.listdir(RESULTS_DIR) if f.endswith(".txt")]
-    if not files:
-        console.print("[bold red]No saved logs to delete![/bold red]")
-        time.sleep(2)
-        return
-
-    while True:
-        console.clear()
-        show_banner()
-        console.print("[bold red]DELETE SAVED LOGS[/bold red]")
-        for i, f in enumerate(files, 1):
-            console.print(f"{i}. {f}")
-        console.print(f"{len(files)+1}. DELETE ALL LOGS")
-        console.print(f"{len(files)+2}. Back")
-        
-        choice = Prompt.ask("\nSelect option", default=str(len(files)+2))
-        
-        if choice.isdigit() and 1 <= int(choice) <= len(files):
-            file_name = files[int(choice)-1]
-            confirm = Prompt.ask(f"Are you sure you want to delete {file_name}?", choices=["Y", "N"], default="N")
-            if confirm.upper() == "Y":
-                os.remove(os.path.join(RESULTS_DIR, file_name))
-                console.print(f"[bold green]Deleted {file_name}[/bold green]")
-                files.pop(int(choice)-1)
-                time.sleep(1)
-            if not files: break
-        elif choice == str(len(files)+1):
-            confirm = Prompt.ask("Are you sure you want to delete ALL logs?", choices=["Y", "N"], default="N")
-            if confirm.upper() == "Y":
-                for f in files:
-                    os.remove(os.path.join(RESULTS_DIR, f))
-                console.print("[bold green]All logs deleted successfully![/bold green]")
-                time.sleep(2)
-                break
-        else:
-            break
-
 def view_results():
     from .output import RESULTS_DIR
     if not RESULTS_DIR.exists():
@@ -148,37 +103,64 @@ def view_results():
     while True:
         console.clear()
         show_banner()
-        console.print("[bold cyan]SCAN RESULTS LOG[/bold cyan]")
+        console.print("[bold cyan]VIEW SAVED LOGS[/bold cyan]")
         for i, f in enumerate(files, 1):
             console.print(f"{i}. {f}")
-        console.print(f"{len(files)+1}. Back")
+        console.print(f"{len(files)+1}. [bold red]DELETE ALL LOGS[/bold red]")
+        console.print(f"{len(files)+2}. Back")
         
-        choice = Prompt.ask("\nSelect file to view", default=str(len(files)+1))
+        choice = Prompt.ask("\nSelect option", default=str(len(files)+2))
+        
         if choice.isdigit() and 1 <= int(choice) <= len(files):
             file_name = files[int(choice)-1]
             file_path = os.path.join(RESULTS_DIR, file_name)
             
-            table = Table(title=f"[bold cyan]Content of {file_name}[/bold cyan]", show_lines=True)
-            table.add_column("Target", style="white")
-            table.add_column("IP", style="yellow")
-            table.add_column("Infra", style="magenta")
-            table.add_column("Server", style="green")
-            table.add_column("Status", style="cyan")
-            table.add_column("Signal", style="white")
+            # Action menu for selected file
+            console.print(f"\n[cyan]File: {file_name}[/cyan]")
+            console.print("1. [green]View log content[/green]")
+            console.print("2. [red]Delete this log[/red]")
+            console.print("3. Back")
+            
+            file_choice = Prompt.ask("Action", choices=["1", "2", "3"], default="1")
+            
+            if file_choice == "1":
+                table = Table(title=f"[bold cyan]Content of {file_name}[/bold cyan]", show_lines=True)
+                table.add_column("Target", style="white")
+                table.add_column("IP", style="yellow")
+                table.add_column("Infra", style="magenta")
+                table.add_column("Server", style="green")
+                table.add_column("Status", style="cyan")
+                table.add_column("Signal", style="white")
 
-            with open(file_path, 'r') as f:
-                for line in f:
-                    if '|' in line:
-                        parts = [p.strip() for p in line.split('|')]
-                        if len(parts) >= 6:
-                            table.add_row(*parts[:6])
+                with open(file_path, 'r') as f:
+                    for line in f:
+                        if '|' in line:
+                            parts = [p.strip() for p in line.split('|')]
+                            if len(parts) >= 6:
+                                table.add_row(*parts[:6])
+                            else:
+                                table.add_row(line.strip(), "", "", "", "", "")
                         else:
                             table.add_row(line.strip(), "", "", "", "", "")
-                    else:
-                        table.add_row(line.strip(), "", "", "", "", "")
+                
+                console.print(table)
+                Prompt.ask("\n[bold yellow]Press ENTER to go back[/bold yellow]")
+            elif file_choice == "2":
+                confirm = Prompt.ask(f"Are you sure you want to delete {file_name}?", choices=["Y", "N"], default="N")
+                if confirm.upper() == "Y":
+                    os.remove(file_path)
+                    console.print(f"[bold green]Deleted {file_name}[/bold green]")
+                    files.pop(int(choice)-1)
+                    time.sleep(1)
             
-            console.print(table)
-            Prompt.ask("\n[bold yellow]Press ENTER to go back[/bold yellow]")
+        elif choice == str(len(files)+1):
+            confirm = Prompt.ask("Are you sure you want to delete ALL logs?", choices=["Y", "N"], default="N")
+            if confirm.upper() == "Y":
+                for f in files:
+                    os.remove(os.path.join(RESULTS_DIR, f))
+                console.print("[bold green]All logs deleted successfully![/bold green]")
+                time.sleep(2)
+                break
         else:
             break
 
@@ -249,7 +231,7 @@ def main():
         show_banner()
         show_menu()
         
-        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
+        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9"])
         
         if choice == "1":
             target = Prompt.ask("Enter Domain or IP")
@@ -327,12 +309,9 @@ def main():
             view_results()
 
         elif choice == "8":
-            delete_results()
-
-        elif choice == "9":
             handle_settings(settings)
             
-        elif choice == "10":
+        elif choice == "9":
             console.print("[bold yellow]Exiting...[/bold yellow]")
             sys.exit()
 

@@ -88,9 +88,8 @@ def identify_infra(headers, status_code):
         signal = "Restricted but Live"
     elif status_code == 404:
         signal = "Endpoint Responding"
-    elif status_code == 101: # Redundant but safe
-        signal = "Protocol Upgrade Seen"
-        high_signal = True
+    elif status_code == 502:
+        signal = "Bad Gateway / Live"
 
     # SSH Payload Detection specific
     if status_code == 101 and ("ssh" in server.lower() or "ssh" in str(headers).lower()):

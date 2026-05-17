@@ -32,39 +32,67 @@ def detect_target_type(target):
 def reverse_dns(ip):
     try:
         socket.setdefaulttimeout(2)
+        # Try standard host lookup
         host = socket.gethostbyaddr(ip)[0]
         return host
     except:
-        return "Unknown Host"
+        # Fallback to getnameinfo for potentially better results on some systems
+        try:
+            return socket.getnameinfo((ip, 0), 0)[0]
+        except:
+            return "Unknown Host"
 
 def get_cidr(ip):
     try:
-        # Use a more reliable way to get CIDR/ASN info that works in Termux
-        # ipwhois often fails due to DNS issues in restricted environments
-        from ipwhois import IPWhois
-        import warnings
-        warnings.filterwarnings("ignore")
-        
-        obj = IPWhois(ip)
-        # Avoid rdap if it's causing resolv.conf issues, try legacy whois first or handle error
+        # First attempt: ipwhois (RDAP/WHOIS)
         try:
-            results = obj.lookup_rdap(depth=1)
-        except Exception:
-            results = obj.lookup_whois()
+            from ipwhois import IPWhois
+            import warnings
+            warnings.filterwarnings("ignore")
+            
+            # Use offline-friendly lookup if possible or handle the resolv.conf error
+            obj = IPWhois(ip)
+            try:
+                # Try RDAP first
+                results = obj.lookup_rdap(depth=1)
+            except Exception:
+                # Fallback to WHOIS (less likely to need system DNS files in some libs)
+                results = obj.lookup_whois()
 
-        network = results.get('network', {})
-        asn = results.get('asn', 'N/A')
-        country = results.get('asn_country_code', 'N/A')
-        
-        # Build a detailed response
-        cidr_val = network.get('cidr', 'N/A')
-        org = network.get('name', network.get('org', 'N/A'))
-        
+            network = results.get('network', {})
+            asn = results.get('asn', 'N/A')
+            country = results.get('asn_country_code', 'N/A')
+            cidr_val = network.get('cidr', 'N/A')
+            org = network.get('name', network.get('org', 'N/A'))
+            
+            if cidr_val != 'N/A':
+                return {
+                    "cidr": cidr_val,
+                    "asn": f"AS{asn}",
+                    "org": org.upper(),
+                    "country": country
+                }
+        except Exception:
+            pass
+
+        # Fallback: Local calculation for nearest CIDR based on common ranges
+        # This is for when external APIs/system files are totally blocked/broken
+        ip_obj = ipaddress.ip_address(ip)
+        # Just default to a /24 or /22 based on class or simply return something safe
+        # but let's try to be a bit smarter
+        first_octet = int(ip.split('.')[0])
+        if 1 <= first_octet <= 126: # Class A
+            cidr = f"{ip.split('.')[0]}.0.0.0/8"
+        elif 128 <= first_octet <= 191: # Class B
+            cidr = f"{ip.split('.')[0]}.{ip.split('.')[1]}.0.0/16"
+        else: # Class C etc
+            cidr = f"{ip.split('.')[0]}.{ip.split('.')[1]}.{ip.split('.')[2]}.0/24"
+            
         return {
-            "cidr": cidr_val,
-            "asn": f"AS{asn}",
-            "org": org.upper(),
-            "country": country
+            "cidr": cidr,
+            "asn": "LOCAL-CALC",
+            "org": "UNKNOWN-INFRA",
+            "country": "UNKNOWN"
         }
     except Exception as e:
         return f"Error: {str(e)}"
