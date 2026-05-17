@@ -32,19 +32,25 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
 
     # Compact progress for Termux/Mobile
     with Progress(
-        SpinnerColumn(spinner_name="dots"),
-        TextColumn("[bold magenta]SCAN[/bold magenta]"),
-        BarColumn(bar_width=5, complete_style="green"), # Minimal bar for mobile
-        MofNCompleteColumn(),
-        TextColumn("[blue]H:{task.fields[found]}"),
+        SpinnerColumn(spinner_name="earth"),
+        TextColumn("[bold red]『 HUNTER ACTIVE 』[/]\n[cyan]{task.fields[target]}[/]\n"),
+        BarColumn(bar_width=12, complete_style="green", finished_style="blue"),
+        TextColumn("[white]{task.percentage:>3.0f}%[/]"),
+        TextColumn("[bold blue]H:{task.fields[found]}[/] [bold white]/ T:{task.total}[/]"),
         console=console,
-        expand=False
+        expand=False,
+        refresh_per_second=10
     ) as progress:
-        task = progress.add_task("HUNT", total=real_total, found=0)
+        task = progress.add_task("HUNT", total=real_total, found=0, target="Initializing...")
         
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
             futures_to_target = {}
             for target in target_list:
+                # Deduplicate at the target list level
+                if target in seen_hits:
+                    progress.update(task, advance=num_ports)
+                    continue
+
                 if ':' in target and not target.startswith('http'):
                     parts = target.split(':')
                     domain = parts[0].strip()
@@ -65,6 +71,9 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
                     futures_to_target[f] = f"{domain}:{port}"
 
             for future in as_completed(futures_to_target):
+                t_str = futures_to_target[future]
+                progress.update(task, target=t_str)
+                
                 result = future.result()
                 if result and result.get('status') != "ERROR":
                     hit_id = result['target']
@@ -77,7 +86,7 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
                 
     console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found_count} unique hits.")
     
-    if found > 0:
+    if found_count > 0:
         save = Prompt.ask("\nSave results to file?", choices=["Y", "N"], default="Y")
         if save.upper() == "N":
             # If they don't want to save, we should ideally not have saved them automatically

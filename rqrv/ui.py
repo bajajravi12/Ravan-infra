@@ -47,8 +47,13 @@ def show_hit_panel(res):
     status_code = res.get('status')
     protocol = res.get('protocol', 'HTTP/1.1')
     
-    border_style = "bold red" if status_code == "SSL_ERR" else "bold green"
-    title = f"[bold red]⚠ SSL ERROR [{now}][/bold red]" if status_code == "SSL_ERR" else f"[bold green]✓ HIT [{now}][/bold green]"
+    # Premium Colors
+    border_style = "bold green"
+    if status_code == 101: border_style = "bold yellow"
+    elif status_code == "SSL_ERR": border_style = "bold red"
+    
+    title = f"[bold green]✓ HIT [{now}][/bold green]"
+    if status_code == "SSL_ERR": title = f"[bold red]⚠ SSL ERROR [{now}][/bold red]"
     
     table = Table(show_header=False, box=None, padding=(0, 1))
     table.add_column("Key", style="bold cyan", width=14)
@@ -57,26 +62,29 @@ def show_hit_panel(res):
     table.add_row("Proxy IP:PORT", f"[bold yellow]{res['target']}[/bold yellow]")
 
     if res.get('dns') and res['dns'] != "Unknown Host":
-        table.add_row("DNS Hostname", f"[magenta]{res['dns']}[/magenta]")
+        table.add_row("DNS Hostname", f"[bold magenta]{res['dns']}[/bold magenta]")
     
     server_val = res.get('server', 'Unknown')
-    if res.get('type') != "UNKNOWN" and res.get('type') != "SSL_HANDSHAKE_FAILURE":
-        server_val = f"{res['type']} {server_val}"
+    infra_type = res.get('type', 'UNKNOWN')
+    if infra_type != "UNKNOWN" and infra_type != "SSL_HANDSHAKE_FAILURE":
+        server_val = f"[bold {res.get('color', 'white')}]{infra_type}[/bold {res.get('color', 'white')}] ({server_val})"
+    
     table.add_row("Server", server_val)
     
     if status_code == 101:
-        status_text = f"{protocol} 101 [bold yellow]Switching Protocols[/bold yellow]"
+        status_text = f"[bold white]{protocol}[/bold white] [bold yellow]101 Switching Protocols[/bold yellow]"
     elif status_code == "SSL_ERR":
-        status_text = f"{protocol} [bold red]Handshake Failure[/bold red]"
+        status_text = f"[bold white]{protocol}[/bold white] [bold red]Handshake Failure[/bold red]"
     else:
-        status_text = f"{protocol} {status_code}"
+        status_text = f"[bold white]{protocol}[/bold white] [bold green]{status_code}[/bold green]"
     
     table.add_row("Status", status_text)
     table.add_row("Method", f"[bold cyan]{res.get('method', 'HTTP')}[/bold cyan]")
     table.add_row("Signal", f"[bold {res.get('color', 'green')}]{res['signal']}[/bold {res.get('color', 'green')}]")
 
     tls_status = res.get('tls', 'Enabled')
-    table.add_row("TLS", f"[bold green]{tls_status}[/bold green]" if tls_status == "Enabled" else f"[bold red]{tls_status}[/bold red]")
+    tls_color = "green" if tls_status == "Enabled" else "red"
+    table.add_row("TLS", f"[bold {tls_color}]{tls_status}[/bold {tls_color}]")
     
     http_v = res.get('protocol', 'HTTP/1.1')
     table.add_row("HTTP Version", f"[bold white]{http_v}[/bold white]")
@@ -86,6 +94,7 @@ def show_hit_panel(res):
         title=title,
         border_style=border_style,
         expand=False,
+        width=min(console.width - 2, 48), # Mobile safe width
         padding=(0, 1)
     )
     console.print(panel)
@@ -94,39 +103,33 @@ def print_live(result, force_show=False, settings=None):
     if not result:
         return
     
-    high_signals = settings.get('high_signals', []) if settings else []
-    
-    def should_show_panel(res):
+    def should_show_premium(res):
         if force_show: return True
-        if res.get('status') == "SSL_ERR": return True
+        # Only show the premium box for these interesting statuses or high signals
+        status = res.get('status')
+        if status in [101, 200, "SSL_ERR"]: return True
         if res.get('high_signal'): return True
-        
-        # Custom checks
-        sig = res.get('signal', '')
-        infra = res.get('type', '')
-        status = str(res.get('status', ''))
-        
-        for hs in high_signals:
-            if hs.lower() in sig.lower() or hs.lower() in infra.lower() or hs.lower() in status.lower():
-                return True
         return False
 
     def handle_res(res):
         if res.get('status') == "ERROR":
-            if force_show: # Only show explicit errors in single/analyze mode
-                console.print(f"[bold red][ERR][/bold red] [white]{res['target']}[/white] | [red]{res['error']}[/red]")
-            return
+            return # Silent errors in bulk mode
 
-        if should_show_panel(res):
+        if should_show_premium(res):
             show_hit_panel(res)
         else:
+            # Filter out non-interesting 404/403/502 etc unless they have unique infra
+            infra = res.get('type', 'UNKNOWN')
+            status = res.get('status')
+            if infra == "UNKNOWN" and status in [404, 403, 502, 503, 504, 400]:
+                return # Silence noise
+                
             color = res.get('color', 'white')
-            status = res.get('status', 'UNK')
             proto = res.get('protocol', 'H1')
-            if proto == "HTTP/2": proto = "H2"
-            elif proto == "HTTP/1.1": proto = "H1"
+            if "2" in str(proto): proto = "H2"
+            else: proto = "H1"
             
-            text = f"[bold green][LIVE][/bold green] [white]{res['target']}[/white] | [bold yellow]{res['ip']}[/bold yellow] | [bold {color}]{res['type']}[/bold {color}] | {proto} {status}"
+            text = f"[bold green][LIVE][/bold green] [white]{res['target']}[/white] | [bold yellow]{res['ip']}[/bold yellow] | [bold {color}]{infra}[/bold {color}] | {proto} {status}"
             console.print(text)
 
     if isinstance(result, list):

@@ -42,7 +42,7 @@ def identify_infra(headers, status_code):
     method = "DIRECT/HTTP"
     if status_code == 101:
         if cdn == "CLOUDFRONT":
-            method = "WS/SSH"
+            method = "WS/SSH + SNI"
         elif cdn == "CLOUDFLARE":
             method = "WS/GRPC"
         else:
@@ -50,7 +50,7 @@ def identify_infra(headers, status_code):
     elif cdn == "CLOUDFLARE":
         method = "WS/SSH+SNI"
     elif cdn == "CLOUDFRONT":
-        method = "CDN/SSL"
+        method = "CDN/SSL + SNI"
     elif cdn == "FASTLY":
         method = "EDGE/PUSH"
     elif cdn == "AKAMAI":
@@ -62,39 +62,51 @@ def identify_infra(headers, status_code):
     elif "proxy" in str(headers).lower() or "via" in headers:
         method = "REVERSE-PROXY"
     elif status_code == 200:
-        method = "SSL PAYLOAD"
+        if cdn != "UNKNOWN":
+            method = f"{cdn} PAYLOAD"
+        else:
+            method = "SSL PAYLOAD"
 
-    # Signal Classification (Cleaned from HTML)
+    # Signal Classification (Strictly Clean - NO HTML)
     signal = "Unknown Activity"
     high_signal = False
     
     if status_code == 101:
         if cdn == "CLOUDFRONT":
-            signal = "Switching Protocols (WS/SSH Proxy)"
+            signal = "CloudFront SSH Proxy Detected"
         elif cdn == "CLOUDFLARE":
-            signal = "Switching Protocols (WS/gRPC)"
+            signal = "Cloudflare WS Proxy Active"
         else:
-            signal = "Switching Protocols (WebSocket Upgrade)"
+            signal = "Switching Protocols Active"
         high_signal = True
     elif status_code in [200, 201, 204]:
-        signal = "HTTP Responsive (Payload Ready)"
+        if cdn != "UNKNOWN":
+            signal = f"{cdn} Payload Compatible"
+        else:
+            signal = "HTTP Responsive (Payload Ready)"
     elif status_code in [301, 302, 307, 308]:
-        signal = "HTTP Redirect (3xx Loop)"
+        signal = "HTTP Redirect (Live)"
     elif status_code == 403:
-        signal = "HTTP Forbidden (403 Live)"
+        if cdn != "UNKNOWN":
+            signal = f"{cdn} Forbidden (Live)"
+        else:
+            signal = "Forbidden (403 Live)"
     elif status_code == 404:
-        signal = "Not Found (404 Alive)"
+        signal = "Endpoint Responding (404)"
     elif status_code == 502:
-        signal = "Bad Gateway (502 Live)"
+        signal = "Bad Gateway (Live)"
     else:
         signal = f"Response {status_code} Alive"
 
-    # SSH Payload Detection specific
-    if status_code == 101 and ("ssh" in server.lower() or "ssh" in str(headers).lower()):
-        signal = "SSH over WebSocket Found"
+    # SSH over HTTP/WS Detection
+    if status_code == 101 and ("ssh" in server.lower() or "ssh" in str(headers).lower() or "ssh" in connection):
+        signal = "SSH Payload Proxy Found"
         method = "SSH+WS"
 
-    # Final logic for high signal
+    # Payload compatibility signals
+    if any(h in headers for h in ['x-amz-cf-id', 'cf-ray', 'x-served-by']):
+        high_signal = True
+    
     if high_signal or (cdn != "UNKNOWN" and status_code in [101, 200, 403]):
         high_signal = True
 
