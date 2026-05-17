@@ -145,10 +145,10 @@ class Scanner:
                             "port": port,
                             "method": "GET",
                             "signal": "Handshake Error",
-                            "high_signal": True,
+                            "high_signal": False,
                             "proxy": "Direct",
                             "tls": "Failed",
-                            "confidence": "Medium"
+                            "confidence": "Low"
                         }
                         output_data = f"{domain}:{port} | {ip} | SSL_ERR | Unknown | SSL_ERR | SSL Handshake Failure"
                         save_result("SSL Handshake Failure", output_data, self.settings['save_results'], infra="UNKNOWN", session_file=self.session_file)

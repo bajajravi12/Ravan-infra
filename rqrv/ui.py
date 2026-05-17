@@ -119,26 +119,34 @@ def print_live(result, force_show=False, settings=None):
         return False
 
     def handle_res(res):
-        if res.get('status') == "ERROR":
+        if not res or res.get('status') == "ERROR":
             return # Silent errors in bulk mode
+
+        status = res.get('status')
+        infra = res.get('type', 'UNKNOWN')
+        high_signal = res.get('high_signal', False)
+
+        # SILENT ERROR HANDLING: Ignore weak/broken responses in bulk mode
+        if not force_show:
+            # Strictly filter out common connection/protocol noise
+            noise_patterns = ["SSL", "TLS", "TIMEOUT", "RESET", "EOF", "CONN", "DNS", "HANDSHAKE"]
+            if any(p in str(status).upper() for p in noise_patterns) and not high_signal:
+                return
+            
+            # Filter boring status codes if no high signal detected
+            boring_codes = [400, 403, 404, 502, 503, 504]
+            if status in boring_codes and not high_signal:
+                return
+            
+            # If status is 200 but infra is UNKNOWN and no high signal, it might be boring
+            if status == 200 and infra == "UNKNOWN" and not high_signal:
+                # We show it as a line, not a panel, but maybe even skip if too noisy?
+                # For now, let's keep 200s as lines at least.
+                pass
 
         if should_show_premium(res):
             show_hit_panel(res)
         else:
-            # Filter out non-interesting noise
-            infra = res.get('type', 'UNKNOWN')
-            status = res.get('status')
-            
-            # If not force_show, we want to BE VERY STRICT in bulk mode
-            if not force_show:
-                # Silently ignore these common spam/error codes if no special infra detected
-                boring_codes = [403, 404, 502, 503, 504, 400, "SSL_ERR", "TIMEOUT", "RESET", "EOF"]
-                if status in boring_codes and infra == "UNKNOWN":
-                    return
-                # If Handshake failure or timeout without special infra, skip
-                if str(status).startswith("SSL") or str(status).startswith("CONN"):
-                    if infra == "UNKNOWN": return
-
             color = res.get('color', 'white')
             proto = res.get('protocol', 'H1')
             if "2" in str(proto): proto = "H2"

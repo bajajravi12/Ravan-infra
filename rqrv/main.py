@@ -98,12 +98,16 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
         
         if enable_controls:
             def control_listener():
+                import sys
+                import select
                 while not scanner.stop_event.is_set():
                     try:
-                        import sys
-                        import select
-                        if select.select([sys.stdin], [], [], 0.5)[0]:
-                            cmd = sys.stdin.read(1).lower()
+                        # Non-blocking check for input
+                        ready, _, _ = select.select([sys.stdin], [], [], 0.1)
+                        if ready:
+                            line = sys.stdin.readline().strip().lower()
+                            if not line: continue
+                            cmd = line[0]
                             if cmd == 'p':
                                 scanner.pause_event.clear()
                                 console.print("\n[bold yellow]⚠ SCAN PAUSED. Press 'R' to Resume.[/bold yellow]")
@@ -115,28 +119,32 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
                                 scanner.pause_event.set()
                                 console.print("\n[bold red]Stopping... Saving Session.[/bold red]")
                     except:
-                        pass
+                        break
 
-            threading.Thread(target=control_listener, daemon=True).start()
+            t = threading.Thread(target=control_listener, daemon=True)
+            t.start()
 
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
             futures_to_target = {}
             
-            # Use iterator to handle Huge lists and Generators memory safely
+            # Use iterator for non-blocking stream processing
             target_iter = iter(target_list)
             
-            # Skip to start_index
-            for _ in range(start_index):
-                try: next(target_iter)
-                except StopIteration: break
+            # Skip for resume
+            if start_index > 0:
+                for _ in range(start_index):
+                    try: next(target_iter)
+                    except StopIteration: break
 
             finished = False
             while not finished and not scanner.stop_event.is_set():
-                # Fill queue
-                batch_size = settings['threads'] * 2
+                # Fill batch dynamically
+                batch_size = max(1, settings['threads'] * 2)
                 batch = []
                 for _ in range(batch_size):
-                    try: batch.append(next(target_iter))
+                    try:
+                        val = next(target_iter)
+                        if val: batch.append(val)
                     except StopIteration:
                         finished = True
                         break
