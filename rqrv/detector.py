@@ -70,30 +70,28 @@ def identify_infra(headers, status_code):
     
     if status_code == 101:
         if cdn == "CLOUDFRONT":
-            signal = "CloudFront SSH Proxy + SNI"
+            signal = "Switching Protocols (WS/SSH Proxy)"
         elif cdn == "CLOUDFLARE":
-            signal = "Cloudflare WS Proxy Active"
+            signal = "Switching Protocols (WS/gRPC)"
         else:
-            signal = "Switching Protocols Active"
-        high_signal = True
-    elif upgrade == "websocket" or "websocket" in connection:
-        signal = "WebSocket Upgrade Support"
+            signal = "Switching Protocols (WebSocket Upgrade)"
         high_signal = True
     elif status_code in [200, 201, 204]:
-        signal = "HTTP Responsive"
-        if cdn != "UNKNOWN": signal = f"{cdn} Payload Compatible"
+        signal = "HTTP Responsive (Payload Ready)"
     elif status_code in [301, 302, 307, 308]:
-        signal = "Redirect Loop/Live"
-    elif status_code in [401, 403]:
-        signal = "Restricted but Live"
+        signal = "HTTP Redirect (3xx Loop)"
+    elif status_code == 403:
+        signal = "HTTP Forbidden (403 Live)"
     elif status_code == 404:
-        signal = "Endpoint Responding"
+        signal = "Not Found (404 Alive)"
     elif status_code == 502:
-        signal = "Bad Gateway / Live"
+        signal = "Bad Gateway (502 Live)"
+    else:
+        signal = f"Response {status_code} Alive"
 
     # SSH Payload Detection specific
     if status_code == 101 and ("ssh" in server.lower() or "ssh" in str(headers).lower()):
-        signal = "SSH Payload Proxy Found"
+        signal = "SSH over WebSocket Found"
         method = "SSH+WS"
 
     # Final logic for high signal

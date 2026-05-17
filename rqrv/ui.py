@@ -15,10 +15,10 @@ def show_banner():
 [bold cyan]██╔══██╗██║▄▄ ██║[/bold cyan]
 [bold blue]██║  ██║╚██████╔╝[/bold blue]
 [bold magenta]╚═╝  ╚═╝ ╚══▀▀═╝[/bold magenta]
-[bold red]R[/bold red][bold yellow]A[/bold yellow][bold green]V[/bold green][bold cyan]A[/bold cyan][bold blue]N[/bold blue] [bold magenta]I[/bold magenta][bold red]N[/bold red][bold yellow]F[/bold yellow][bold green]R[/bold green][bold cyan]A[/bold cyan][bold blue]-[/bold blue][bold magenta]X[/bold magenta] [bold red]U[/bold red][bold yellow]L[/bold yellow][bold green]T[/bold green][bold cyan]R[/bold cyan][bold blue]A[/bold blue]
+[bold red]R[/bold red][bold yellow]A[/bold yellow][bold green]V[/bold green][bold cyan]A[/bold cyan][bold blue]N[/bold blue] [bold magenta]I[/bold magenta][bold red]N[/bold red][bold yellow]F[/bold yellow][bold green]R[/bold green][bold cyan]A[/bold cyan][bold blue]X[/bold blue] [bold magenta]U[/bold magenta][bold red]L[/bold red][bold yellow]T[/bold yellow][bold green]R[/bold green][bold cyan]A[/bold cyan]
 [bold white]⚡ THE ULTIMATE BUG HOST HUNTER ⚡[/bold white]
     """
-    console.print(Panel.fit(banner, border_style="bold green", subtitle="[bold yellow]v3.6.4 - STABLE[/bold yellow]"))
+    console.print(Panel.fit(banner, border_style="bold green", subtitle="[bold yellow]v3.6.6 - STABLE[/bold yellow]"))
 
 def show_menu():
     table = Table(show_header=False, box=None, padding=(0, 2))
@@ -32,11 +32,12 @@ def show_menu():
     table.add_row("🔍 [5]", "[bold bright_white]REVERSE DNS PRO[/bold bright_white]")
     table.add_row("🌐 [6]", "[bold green]IP TO CIDR FINDER[/bold green]")
     table.add_row("📂 [7]", "[bold yellow]VIEW SAVED LOGS[/bold yellow]")
-    table.add_row("🗑️ [8]", "[bold red]DELETE SAVED LOGS[/bold red]")
-    table.add_row("⚙️ [9]", "[bold white]HUNTER SETTINGS[/bold white]")
+    table.add_row("⚙️ [8]", "[bold white]HUNTER SETTINGS[/bold white]")
+    table.add_row("ℹ️ [9]", "[bold cyan]ABOUT RQRV[/bold cyan]")
     table.add_row("❌ [10]", "[bold red]EXIT PROGRAM[/bold red]")
     
-    console.print(Panel(table, title="[bold red]──『 RAVAN CONTROL CENTER 』──[/bold red]", border_style="bold green", padding=(1, 1)))
+    # Use Panel.fit for main menu too if it helps alignment, or just keep it centered.
+    console.print(Panel(table, title="[bold red]──『 RAVAN MENU 』──[/bold red]", border_style="bold green", padding=(1, 1), expand=False))
 
 import datetime
 
@@ -50,14 +51,13 @@ def show_hit_panel(res):
     title = f"[bold red]⚠ SSL ERROR [{now}][/bold red]" if status_code == "SSL_ERR" else f"[bold green]✓ HIT [{now}][/bold green]"
     
     table = Table(show_header=False, box=None, padding=(0, 1))
-    table.add_column("Key", style="bold cyan", width=12)
+    table.add_column("Key", style="bold cyan", width=14)
     table.add_column("Value", style="white")
     
-    target_val = f"[bold yellow]{res['target']}[/bold yellow]"
-    table.add_row("Proxy", target_val)
+    table.add_row("Proxy IP:PORT", f"[bold yellow]{res['target']}[/bold yellow]")
 
-    if res.get('dns'):
-        table.add_row("DNS", f"[magenta]{res['dns']}[/magenta]")
+    if res.get('dns') and res['dns'] != "Unknown Host":
+        table.add_row("DNS Hostname", f"[magenta]{res['dns']}[/magenta]")
     
     server_val = res.get('server', 'Unknown')
     if res.get('type') != "UNKNOWN" and res.get('type') != "SSL_HANDSHAKE_FAILURE":
@@ -67,19 +67,19 @@ def show_hit_panel(res):
     if status_code == 101:
         status_text = f"{protocol} 101 [bold yellow]Switching Protocols[/bold yellow]"
     elif status_code == "SSL_ERR":
-        status_text = f"{protocol} [bold red]SSL Handshake Failure[/bold red]"
+        status_text = f"{protocol} [bold red]Handshake Failure[/bold red]"
     else:
         status_text = f"{protocol} {status_code}"
     
     table.add_row("Status", status_text)
-    
-    if res.get('proxy'):
-        table.add_row("Method", f"[bold cyan]{res.get('method', 'HTTP')}[/bold cyan]")
-    
+    table.add_row("Method", f"[bold cyan]{res.get('method', 'HTTP')}[/bold cyan]")
     table.add_row("Signal", f"[bold {res.get('color', 'green')}]{res['signal']}[/bold {res.get('color', 'green')}]")
 
     tls_status = res.get('tls', 'Enabled')
     table.add_row("TLS", f"[bold green]{tls_status}[/bold green]" if tls_status == "Enabled" else f"[bold red]{tls_status}[/bold red]")
+    
+    http_v = res.get('protocol', 'HTTP/1.1')
+    table.add_row("HTTP Version", f"[bold white]{http_v}[/bold white]")
     
     panel = Panel(
         table,

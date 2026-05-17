@@ -7,7 +7,7 @@ from .settings import load_settings, save_settings
 from .scanner import Scanner
 from .cidr import generate_ips
 from .file_parser import parse_file
-from .utils import detect_target_type, reverse_dns, get_cidr
+from .utils import detect_target_type, reverse_dns, get_cidr, reverse_dns_pro
 from .ui import show_banner, show_menu, console, print_live
 from rich.prompt import Prompt
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn, MofNCompleteColumn, TimeRemainingColumn
@@ -33,12 +33,12 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
     # Compact progress for Termux/Mobile
     with Progress(
         SpinnerColumn(spinner_name="dots"),
-        TextColumn("[magenta]HUNTING[/]"),
-        BarColumn(bar_width=8, complete_style="green"), # Even narrower
+        TextColumn("[bold magenta]SCAN[/bold magenta]"),
+        BarColumn(bar_width=5, complete_style="green"), # Minimal bar for mobile
         MofNCompleteColumn(),
         TextColumn("[blue]H:{task.fields[found]}"),
         console=console,
-        expand=False # Don't expand to full width to avoid wrapping
+        expand=False
     ) as progress:
         task = progress.add_task("HUNT", total=real_total, found=0)
         
@@ -231,8 +231,12 @@ def main():
         show_banner()
         show_menu()
         
-        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9"])
+        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "q", "quit", "exit"], default="1")
         
+        if choice in ["q", "quit", "exit", "10"]:
+            console.print("[bold yellow]Exiting...[/bold yellow]")
+            sys.exit()
+
         if choice == "1":
             target = Prompt.ask("Enter Domain or IP")
             p = get_manual_ports()
@@ -281,10 +285,17 @@ def main():
             run_scan([target], settings, total=1, force_show=True, manual_ports=p)
 
         elif choice == "5":
-            ip = Prompt.ask("Enter IP for Reverse DNS")
-            result = reverse_dns(ip)
-            console.print(f"\n[bold green]IP:[/bold green] {ip}")
-            console.print(f"[bold green]Domain:[/bold green] {result}")
+            ip = Prompt.ask("Enter IP for Reverse DNS Pro")
+            console.print(f"\n[bold cyan]Deep scanning host {ip}...[/bold cyan]")
+            results = reverse_dns_pro(ip)
+            
+            console.print(f"\n[bold green]Target:[/bold green] {ip}")
+            console.print("[bold yellow]Detected Domains / Hosts:[/bold yellow]")
+            if isinstance(results, list):
+                for domain in results:
+                    console.print(f"- {domain}")
+            else:
+                console.print(f"- {results}")
             Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]")
 
         elif choice == "6":
@@ -312,8 +323,26 @@ def main():
             handle_settings(settings)
             
         elif choice == "9":
-            console.print("[bold yellow]Exiting...[/bold yellow]")
-            sys.exit()
+            console.clear()
+            show_banner()
+            about_text = """
+[bold cyan]R[/bold cyan][bold white]AVAN [/white][bold cyan]I[/bold cyan][bold white]NFRA-[/white][bold cyan]X[/bold cyan] [bold white]ULTRA (RQRV)[/white]
+
+[bold yellow]Version:[/bold yellow] v3.6.6 Stable
+[bold yellow]Author:[/bold yellow] Ravan
+[bold yellow]Platform:[/bold yellow] Termux / Android / Linux
+
+[bold green]Features:[/bold green]
+- Advanced CIDR Scanning
+- Multi-threaded Signal Detection
+- Sub-protocol identification (WS/SSH)
+- Reverse DNS Pro Extraction
+- Mobile-optimized Interface
+
+[bold cyan]GitHub:[/bold cyan] https://github.com/bajajravi12/Ravan-infra
+            """
+            console.print(Panel(about_text, title="[bold cyan]ABOUT TOOL[/bold cyan]", border_style="bold cyan", padding=(1, 2)))
+            Prompt.ask("\n[bold yellow]Press ENTER to return[/bold yellow]")
 
 if __name__ == "__main__":
     try:

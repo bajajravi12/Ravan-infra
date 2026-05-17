@@ -42,6 +42,36 @@ def reverse_dns(ip):
         except:
             return "Unknown Host"
 
+def reverse_dns_pro(target):
+    # Try multiple methods to detect domains
+    domains = set()
+    
+    # Method 1: PTR Lookup
+    ptr = reverse_dns(target)
+    if ptr and ptr != "Unknown Host":
+        domains.add(ptr)
+
+    # Method 2: Header Probing & Common Signatures
+    try:
+        import requests
+        # Rapid probe for headers that might leak hostnames
+        r = requests.get(f"http://{target}", timeout=2, verify=False, allow_redirects=True)
+        
+        # Check Location header
+        loc = r.headers.get('Location', '')
+        if loc:
+            d = loc.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0]
+            if d and not re.match(r'^\d+\.\d+\.\d+\.\d+$', d): domains.add(d)
+                
+        # Check Server/X-Powered-By etc
+        server = r.headers.get('Server', '')
+        if server: domains.add(f"Server: {server}")
+        
+    except:
+        pass
+
+    return list(domains) if domains else ["No Hosted Domains Detected"]
+
 def get_cidr(ip):
     try:
         # First attempt: ipwhois (RDAP/WHOIS)

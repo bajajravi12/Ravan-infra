@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="rqrv",
-    version="3.6.5",
+    version="3.6.6",
     author="Ravan",
     description="The Ultimate Bug Host Hunter Tool (RQRV)",
     long_description=open("README.md").read() if os.path.exists("README.md") else "",
