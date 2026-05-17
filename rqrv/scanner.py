@@ -1,6 +1,7 @@
 import requests
 import urllib3
 import socket
+import threading
 try:
     import httpx
     HAS_HTTPX = True
@@ -17,6 +18,9 @@ class Scanner:
     def __init__(self, settings, session_file=None):
         self.settings = settings
         self.session_file = session_file
+        self.pause_event = threading.Event()
+        self.pause_event.set() # Not paused by default
+        self.stop_event = threading.Event()
         self.session = requests.Session()
         self.dns_cache = {}
         self.rdns_cache = {}
@@ -45,6 +49,10 @@ class Scanner:
             return "0.0.0.0"
 
     def scan_port(self, domain, port):
+        # Respect pause/stop
+        if self.stop_event.is_set(): return None
+        self.pause_event.wait()
+
         # Determine protocol based on port
         is_https = port in [443, 2053, 2083, 2087, 2096, 8443]
         protocols = ["https://", "http://"] if is_https else ["http://", "https://"]

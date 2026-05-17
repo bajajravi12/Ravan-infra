@@ -1,11 +1,19 @@
+import shutil
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.live import Live
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
+from rich.prompt import Prompt
 import os
+import datetime
 
 console = Console()
+
+def get_width():
+    # Detect terminal width dynamically for Termux/Mobile
+    width, _ = shutil.get_terminal_size((48, 20))
+    return min(width, 48)
 
 def show_banner():
     banner = """
@@ -33,13 +41,14 @@ def show_menu():
     table.add_row("🌐 [6]", "[bold green]IP TO CIDR FINDER[/bold green]")
     table.add_row("📂 [7]", "[bold yellow]VIEW SAVED LOGS[/bold yellow]")
     table.add_row("⚙️ [8]", "[bold white]HUNTER SETTINGS[/bold white]")
-    table.add_row("ℹ️ [9]", "[bold cyan]ABOUT RQRV[/bold cyan]")
-    table.add_row("❌ [10]", "[bold red]EXIT PROGRAM[/bold red]")
+    table.add_row("❌ [9]", "[bold red]EXIT PROGRAM[/bold red]")
     
-    # Use Panel.fit for main menu too if it helps alignment, or just keep it centered.
     console.print(Panel(table, title="[bold red]──『 RAVAN MENU 』──[/bold red]", border_style="bold green", padding=(1, 1), expand=False))
 
-import datetime
+def custom_prompt(title, quest, default=""):
+    console.print(f"\n[bold cyan]╭─ {title}[/bold cyan]")
+    val = Prompt.ask(f"[bold white]╰─➤ {quest}[/]", default=default)
+    return val
 
 def show_hit_panel(res):
     now = datetime.datetime.now().strftime("%H:%M:%S")
@@ -52,18 +61,15 @@ def show_hit_panel(res):
     if status_code == 101: border_style = "bold yellow"
     elif status_code == "SSL_ERR": border_style = "bold red"
     
-    title = f"[bold green]✓ HIT [{now}][/bold green]"
-    if status_code == "SSL_ERR": title = f"[bold red]⚠ SSL ERROR [{now}][/bold red]"
+    title = f"╔══ ✓ LIVE HIT ══[{now}]══╗"
+    if status_code == "SSL_ERR": title = f"╔══ ⚠ SSL ERROR ══[{now}]══╗"
     
     table = Table(show_header=False, box=None, padding=(0, 1))
     table.add_column("Key", style="bold cyan", width=14)
     table.add_column("Value", style="white")
     
-    table.add_row("Proxy IP:PORT", f"[bold yellow]{res['target']}[/bold yellow]")
+    table.add_row("Proxy", f"[bold yellow]{res['target']}[/bold yellow]")
 
-    if res.get('dns') and res['dns'] != "Unknown Host":
-        table.add_row("DNS Hostname", f"[bold magenta]{res['dns']}[/bold magenta]")
-    
     server_val = res.get('server', 'Unknown')
     infra_type = res.get('type', 'UNKNOWN')
     if infra_type != "UNKNOWN" and infra_type != "SSL_HANDSHAKE_FAILURE":
@@ -72,11 +78,11 @@ def show_hit_panel(res):
     table.add_row("Server", server_val)
     
     if status_code == 101:
-        status_text = f"[bold white]{protocol}[/bold white] [bold yellow]101 Switching Protocols[/bold yellow]"
+        status_text = f"[bold yellow]HTTP/1.1 101[/bold yellow]"
     elif status_code == "SSL_ERR":
-        status_text = f"[bold white]{protocol}[/bold white] [bold red]Handshake Failure[/bold red]"
+        status_text = f"[bold red]Handshake Failure[/bold red]"
     else:
-        status_text = f"[bold white]{protocol}[/bold white] [bold green]{status_code}[/bold green]"
+        status_text = f"HTTP {status_code}"
     
     table.add_row("Status", status_text)
     table.add_row("Method", f"[bold cyan]{res.get('method', 'HTTP')}[/bold cyan]")
@@ -87,14 +93,14 @@ def show_hit_panel(res):
     table.add_row("TLS", f"[bold {tls_color}]{tls_status}[/bold {tls_color}]")
     
     http_v = res.get('protocol', 'HTTP/1.1')
-    table.add_row("HTTP Version", f"[bold white]{http_v}[/bold white]")
+    table.add_row("Version", f"[bold white]{http_v}[/bold white]")
     
     panel = Panel(
         table,
         title=title,
         border_style=border_style,
         expand=False,
-        width=min(console.width - 2, 48), # Mobile safe width
+        width=get_width(),
         padding=(0, 1)
     )
     console.print(panel)
@@ -107,7 +113,8 @@ def print_live(result, force_show=False, settings=None):
         if force_show: return True
         # Only show the premium box for these interesting statuses or high signals
         status = res.get('status')
-        if status in [101, 200, "SSL_ERR"]: return True
+        # Check for interesting headers or signals
+        if status in [101, 200]: return True
         if res.get('high_signal'): return True
         return False
 
@@ -118,12 +125,17 @@ def print_live(result, force_show=False, settings=None):
         if should_show_premium(res):
             show_hit_panel(res)
         else:
-            # Filter out non-interesting 404/403/502 etc unless they have unique infra
+            # Filter out non-interesting noise
             infra = res.get('type', 'UNKNOWN')
             status = res.get('status')
-            if infra == "UNKNOWN" and status in [404, 403, 502, 503, 504, 400]:
-                return # Silence noise
-                
+            
+            # If not premium but high signal, we already handled it. 
+            # If it's a generic 403/404/SSL_ERR without high signal, ignore it in bulk.
+            if not force_show:
+                boring_codes = [403, 404, 502, 503, 504, 400, "SSL_ERR"]
+                if status in boring_codes and infra == "UNKNOWN":
+                    return
+
             color = res.get('color', 'white')
             proto = res.get('protocol', 'H1')
             if "2" in str(proto): proto = "H2"

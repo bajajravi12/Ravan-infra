@@ -39,6 +39,16 @@ def save_result(signal, data, save_enabled=True, infra=None, session_file=None):
     cat_file = os.path.join(RESULTS_DIR, filename)
     with open(cat_file, "a") as f:
         f.write(data + "\n")
+
+    # CloudFront/Cloudflare Auto-Categorization
+    if infra == "CLOUDFRONT":
+        cf_file = os.path.join(RESULTS_DIR, "cloudfront_hits.txt")
+        with open(cf_file, "a") as f:
+            f.write(data + "\n")
+    elif infra == "CLOUDFLARE":
+        clr_file = os.path.join(RESULTS_DIR, "cloudflare_hits.txt")
+        with open(clr_file, "a") as f:
+            f.write(data + "\n")
         
     # Global hits file requested as live_hits.txt
     live_file = os.path.join(RESULTS_DIR, "live_hits.txt")

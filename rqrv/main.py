@@ -8,16 +8,57 @@ from .scanner import Scanner
 from .cidr import generate_ips
 from .file_parser import parse_file
 from .utils import detect_target_type, reverse_dns, get_cidr, reverse_dns_pro
-from .ui import show_banner, show_menu, console, print_live
-from rich.prompt import Prompt
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn, MofNCompleteColumn, TimeRemainingColumn
-from rich.table import Table
-from rich.panel import Panel
+from .ui import show_banner, show_menu, console, print_live, get_width, custom_prompt
+import json
+import signal
 
-def run_scan(target_list, settings, total=0, session_file=None, force_show=False, manual_ports=None):
+SESSION_FILE = os.path.expanduser("~/.rqrv_session.json")
+
+def save_session(state):
+    try:
+        with open(SESSION_FILE, 'w') as f:
+            json.dump(state, f)
+    except:
+        pass
+
+def load_session():
+    if os.path.exists(SESSION_FILE):
+        try:
+            with open(SESSION_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return None
+    return None
+
+def clear_session():
+    if os.path.exists(SESSION_FILE):
+        try: os.remove(SESSION_FILE)
+        except: pass
+
+def detect_txt_files():
+    search_paths = [
+        os.path.expanduser("~"),
+        os.path.expanduser("~/storage/shared"),
+        os.path.expanduser("~/storage/downloads"),
+        os.path.expanduser("~/storage/documents"),
+        os.getcwd()
+    ]
+    txt_files = []
+    for p in search_paths:
+        if os.path.exists(p):
+            try:
+                for f in os.listdir(p):
+                    if f.endswith(".txt"):
+                        txt_files.append(os.path.join(p, f))
+            except:
+                continue
+    return list(set(txt_files))[:15] # Limit to top 15
+
+def run_scan(target_list, settings, total=0, session_file=None, force_show=False, manual_ports=None, start_index=0, state_meta=None):
     scanner = Scanner(settings, session_file=session_file)
     found_count = 0
     seen_hits = set()
+    current_index = start_index
     
     # Use manual ports if provided, otherwise scanner defaults
     active_ports = manual_ports if manual_ports else scanner.ports
@@ -30,6 +71,11 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
     else:
         real_total = None # Generator mode
 
+    # If resume, adjust progress
+    start_advance = start_index * num_ports
+    
+    console.print(f"\n[bold yellow]Scan Control: [P] Pause | [R] Resume | [Q] Quit & Save[/bold yellow]")
+
     # Compact progress for Termux/Mobile
     with Progress(
         SpinnerColumn(spinner_name="earth"),
@@ -41,58 +87,126 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
         expand=False,
         refresh_per_second=10
     ) as progress:
-        task = progress.add_task("HUNT", total=real_total, found=0, target="Initializing...")
+        task = progress.add_task("HUNT", total=real_total, found=0, target="Initializing...", completed=start_advance)
         
+        # Start input thread for controls
+        import threading
+        def control_listener():
+            while not scanner.stop_event.is_set():
+                try:
+                    import sys
+                    import select
+                    if select.select([sys.stdin], [], [], 0.5)[0]:
+                        cmd = sys.stdin.read(1).lower()
+                        if cmd == 'p':
+                            scanner.pause_event.clear()
+                            console.print("\n[bold yellow]⚠ SCAN PAUSED. Press 'R' to Resume.[/bold yellow]")
+                        elif cmd == 'r':
+                            scanner.pause_event.set()
+                            console.print("\n[bold green]▶ SCAN RESUMED.[/bold green]")
+                        elif cmd == 'q':
+                            scanner.stop_event.set()
+                            scanner.pause_event.set()
+                            console.print("\n[bold red]Stopping... Saving Session.[/bold red]")
+                except:
+                    pass
+
+        threading.Thread(target=control_listener, daemon=True).start()
+
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
             futures_to_target = {}
-            for target in target_list:
-                # Deduplicate at the target list level
-                if target in seen_hits:
-                    progress.update(task, advance=num_ports)
-                    continue
+            
+            # Use iterator to handle Huge lists and Generators memory safely
+            target_iter = iter(target_list)
+            
+            # Skip to start_index
+            for _ in range(start_index):
+                try: next(target_iter)
+                except StopIteration: break
 
-                if ':' in target and not target.startswith('http'):
-                    parts = target.split(':')
-                    domain = parts[0].strip()
-                    try:
-                        scan_ports = [int(parts[1])]
-                    except:
+            finished = False
+            while not finished and not scanner.stop_event.is_set():
+                # Fill queue
+                batch_size = settings['threads'] * 2
+                batch = []
+                for _ in range(batch_size):
+                    try: batch.append(next(target_iter))
+                    except StopIteration:
+                        finished = True
+                        break
+                
+                if not batch: break
+                
+                futures_to_target = {}
+                for target in batch:
+                    # Deduplicate at the target list level
+                    if target in seen_hits:
+                        progress.update(task, advance=num_ports)
+                        current_index += 1
+                        continue
+
+                    if ':' in target and not target.startswith('http'):
+                        parts = target.split(':')
+                        domain = parts[0].strip()
+                        try:
+                            scan_ports = [int(parts[1])]
+                        except:
+                            scan_ports = active_ports
+                    else:
+                        domain = target.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0].strip()
                         scan_ports = active_ports
-                else:
-                    domain = target.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0].strip()
-                    scan_ports = active_ports
-                
-                if not domain:
-                    progress.update(task, advance=num_ports)
-                    continue
                     
-                for port in scan_ports:
-                    f = executor.submit(scanner.scan_port, domain, port)
-                    futures_to_target[f] = f"{domain}:{port}"
+                    if not domain:
+                        progress.update(task, advance=num_ports)
+                        current_index += 1
+                        continue
+                        
+                    for port in scan_ports:
+                        f = executor.submit(scanner.scan_port, domain, port)
+                        futures_to_target[f] = f"{domain}:{port}"
 
-            for future in as_completed(futures_to_target):
-                t_str = futures_to_target[future]
-                progress.update(task, target=t_str)
+                for future in as_completed(futures_to_target):
+                    if scanner.stop_event.is_set(): break
+                    
+                    t_str = futures_to_target[future]
+                    progress.update(task, target=t_str)
+                    
+                    result = future.result()
+                    if result and result.get('status') != "ERROR":
+                        hit_id = result['target']
+                        if hit_id not in seen_hits:
+                            seen_hits.add(hit_id)
+                            found_count += 1
+                            progress.update(task, found=found_count)
+                            print_live(result, force_show=force_show, settings=settings)
+                            
+                            # Auto-save notification logic
+                            infra = result.get('type')
+                            if infra == "CLOUDFRONT":
+                                console.print("[cyan]☁ CLOUDFRONT DETECTED → saved to results/cloudfront_hits.txt[/cyan]")
+                            elif infra == "CLOUDFLARE":
+                                console.print("[magenta]☁ CLOUDFLARE DETECTED → saved to results/cloudflare_hits.txt[/magenta]")
+                    
+                    progress.update(task, advance=1)
                 
-                result = future.result()
-                if result and result.get('status') != "ERROR":
-                    hit_id = result['target']
-                    if hit_id not in seen_hits:
-                        seen_hits.add(hit_id)
-                        found_count += 1
-                        progress.update(task, found=found_count)
-                        print_live(result, force_show=force_show, settings=settings)
-                progress.update(task, advance=1)
+                current_index += len(batch)
                 
-    console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found_count} unique hits.")
+                # Save progress periodically
+                if state_meta:
+                    state_meta['current_index'] = current_index
+                    state_meta['found_count'] = found_count
+                    save_session(state_meta)
+
+    if scanner.stop_event.is_set():
+        console.print(f"\n[bold yellow]Scan stopped at index {current_index}. Session saved.[/bold yellow]")
+    else:
+        console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found_count} unique hits.")
+        clear_session()
     
     if found_count > 0:
         save = Prompt.ask("\nSave results to file?", choices=["Y", "N"], default="Y")
         if save.upper() == "N":
-            # If they don't want to save, we should ideally not have saved them automatically
-            # but current architecture saves as it goes. We can just leave it or manage it better.
-            # For now, let's just confirm they were logged.
-            console.print("[yellow]Results were logged to the results/ directory.[/yellow]")
+            console.print("[yellow]Results were already logged to the results/ directory.[/yellow]")
     
     Prompt.ask("\n[bold yellow]Press ENTER to return to menu[/bold yellow]")
 
@@ -227,102 +341,135 @@ def get_manual_ports():
 
 def main():
     settings = load_settings()
-
-    while True:
-        try:
-            if os.name == 'nt':
-                os.system('cls')
-            else:
-                os.system('clear')
-        except:
-            console.clear()
-            
+    
+    # Check for unfinished sessions
+    session = load_session()
+    if session:
+        console.clear()
         show_banner()
-        show_menu()
+        console.print(f"\n[bold yellow]⚡ Interrupted Scan Found[/bold yellow]")
+        console.print(f"Type: [cyan]{session['type']}[/cyan]")
+        console.print(f"Target: [cyan]{session['input']}[/cyan]")
+        console.print(f"Progress: [cyan]{session['current_index']}[/cyan] hits: [cyan]{session['found_count']}[/cyan]")
         
-        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "q", "quit", "exit"], default="1")
-        
-        if choice in ["q", "quit", "exit", "10"]:
-            console.print("[bold yellow]Exiting...[/bold yellow]")
-            sys.exit()
-
+        choice = Prompt.ask("\n[1] Resume [2] Restart Fresh", choices=["1", "2"], default="1")
         if choice == "1":
-            target = Prompt.ask("Enter Domain or IP")
-            p = get_manual_ports()
-            run_scan([target], settings, total=1, force_show=True, manual_ports=p)
-            
-        elif choice == "2":
-            cidr = Prompt.ask("Enter CIDR (e.g. 1.1.1.0/24)")
-            p = get_manual_ports()
-            console.print("[yellow]Preparing scan (Memory Optimized)...[/yellow]")
-            from ipaddress import ip_network
-            try:
-                clean_cidr = cidr.strip().replace('/', '_')
-                session_file = f"{clean_cidr}.txt"
-                net = ip_network(cidr.strip(), strict=False)
-                total_ips = net.num_addresses
-                run_scan(generate_ips(cidr), settings, total=total_ips, session_file=session_file, manual_ports=p)
-            except Exception as e:
-                console.print(f"[bold red]Invalid CIDR: {e}[/bold red]")
-                time.sleep(2)
-            
-        elif choice == "3":
-            path = Prompt.ask("Enter file path")
-            if os.path.exists(path):
-                p = get_manual_ports()
+            if session['type'] == 'cidr':
+                cidr = session['input']
+                from ipaddress import ip_network
+                net = ip_network(cidr, strict=False)
+                run_scan(generate_ips(cidr), settings, total=net.num_addresses, 
+                         session_file=f"{cidr.replace('/', '_')}.txt", start_index=session['current_index'], 
+                         state_meta=session)
+            elif session['type'] == 'file':
+                path = session['input']
                 def target_generator():
                     raw_targets = parse_file(path)
                     for rt in raw_targets:
                         t_type = detect_target_type(rt)
                         if t_type == 'cidr':
-                            for ip in generate_ips(rt):
-                                yield str(ip)
-                        else:
-                            yield rt
+                            for ip in generate_ips(rt): yield str(ip)
+                        else: yield rt
+                run_scan(target_generator(), settings, session_file="bughosts_results.txt", 
+                         start_index=session['current_index'], state_meta=session)
+            # After resume or finish, continue
+        else:
+            clear_session()
+
+    while True:
+        try:
+            if os.name == 'nt': os.system('cls')
+            else: os.system('clear')
+        except: console.clear()
+            
+        show_banner()
+        show_menu()
+        
+        choice = custom_prompt("INPUT SEC-X", "Select Option", default="1")
+        
+        if choice in ["q", "quit", "exit", "9"]:
+            console.print("[bold yellow]Exiting...[/bold yellow]")
+            sys.exit()
+
+        if choice == "1":
+            target = custom_prompt("SINGLE HUNTER", "Enter Domain or IP")
+            p = get_manual_ports()
+            run_scan([target], settings, total=1, force_show=True, manual_ports=p)
+            
+        elif choice == "2":
+            cidr = custom_prompt("CIDR ATTACK", "Enter CIDR (e.g. 56.228.0.0/20)")
+            p = get_manual_ports()
+            console.print("[yellow]Preparing scan...[/yellow]")
+            from ipaddress import ip_network
+            try:
+                clean_cidr = cidr.strip().replace('/', '_')
+                session_file = f"{clean_cidr}.txt"
+                net = ip_network(cidr.strip(), strict=False)
+                state = {"type": "cidr", "input": cidr.strip(), "current_index": 0, "found_count": 0}
+                save_session(state)
+                run_scan(generate_ips(cidr), settings, total=net.num_addresses, session_file=session_file, manual_ports=p, state_meta=state)
+            except Exception as e:
+                console.print(f"[bold red]Error: {e}[/bold red]")
+                time.sleep(2)
+            
+        elif choice == "3":
+            # File auto-detection
+            txt_files = detect_txt_files()
+            if txt_files:
+                console.print("\n[bold yellow]Detected TXT Files:[/bold yellow]")
+                for i, f in enumerate(txt_files, 1):
+                    console.print(f"[{i}] {os.path.basename(f)}")
+                console.print(f"[{len(txt_files)+1}] Custom Path")
                 
-                session_file = "bughosts_results.txt"
-                run_scan(target_generator(), settings, session_file=session_file, manual_ports=p)
+                f_choice = Prompt.ask("\nSelect file or custom", default="1")
+                if f_choice.isdigit() and 1 <= int(f_choice) <= len(txt_files):
+                    path = txt_files[int(f_choice)-1]
+                else:
+                    path = custom_prompt("FILE PATH", "Enter Path")
+            else:
+                path = custom_prompt("FILE PATH", "Enter Path")
+
+            if os.path.exists(path):
+                start_line = int(custom_prompt("START LINE", "Start from line", default="0"))
+                p = get_manual_ports()
+                
+                def target_generator():
+                    raw_targets = parse_file(path)
+                    for rt in raw_targets:
+                        t_type = detect_target_type(rt)
+                        if t_type == 'cidr':
+                            for ip in generate_ips(rt): yield str(ip)
+                        else: yield rt
+
+                state = {"type": "file", "input": path, "current_index": start_line, "found_count": 0}
+                save_session(state)
+                run_scan(target_generator(), settings, session_file="bughosts_results.txt", manual_ports=p, start_index=start_line, state_meta=state)
             else:
                 console.print("[bold red]File not found![/bold red]")
                 time.sleep(2)
                 
         elif choice == "4":
-            target = Prompt.ask("Enter Target to Analyze")
+            target = custom_prompt("METHOD ANALYZER", "Enter Target")
             p = get_manual_ports()
-            console.print(f"\n[bold cyan]Analyzing {target}...[/bold cyan]")
-            # For analyzer, we specifically want to see details
             run_scan([target], settings, total=1, force_show=True, manual_ports=p)
 
         elif choice == "5":
-            ip = Prompt.ask("Enter IP for Reverse DNS Pro")
-            console.print(f"\n[bold cyan]Deep scanning host {ip}...[/bold cyan]")
+            ip = custom_prompt("REVERSE DNS", "Enter IP")
             results = reverse_dns_pro(ip)
-            
             console.print(f"\n[bold green]Target:[/bold green] {ip}")
-            console.print("[bold yellow]Detected Domains / Hosts:[/bold yellow]")
             if isinstance(results, list):
-                for domain in results:
-                    console.print(f"- {domain}")
-            else:
-                console.print(f"- {results}")
+                for d in results: console.print(f"- {d}")
+            else: console.print(f"- {results}")
             Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]")
 
         elif choice == "6":
-            ip = Prompt.ask("Enter IP to find CIDR")
-            console.print(f"\n[bold cyan]Fetching WHOIS/RDAP data for {ip}...[/bold cyan]")
+            ip = custom_prompt("IP TO CIDR", "Enter IP")
             result = get_cidr(ip)
             if isinstance(result, dict):
                 table = Table(show_header=False, box=None, padding=(0, 1))
-                table.add_column("Key", style="bold cyan")
-                table.add_column("Value", style="bold yellow")
-                table.add_row("IP", ip)
-                table.add_row("CIDR", result['cidr'])
-                table.add_row("ASN", result['asn'])
-                table.add_row("ORG", result['org'])
-                table.add_row("COUNTRY", result['country'])
+                table.add_row("IP", ip); table.add_row("CIDR", result['cidr']); table.add_row("ASN", result['asn'])
                 console.print(Panel(table, title="[bold green]Network Info[/bold green]", border_style="bold green"))
-            else:
-                console.print(f"[bold red]{result}[/bold red]")
+            else: console.print(f"[bold red]{result}[/bold red]")
             Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]")
 
         elif choice == "7":
@@ -330,28 +477,6 @@ def main():
 
         elif choice == "8":
             handle_settings(settings)
-            
-        elif choice == "9":
-            console.clear()
-            show_banner()
-            about_text = """
-[bold cyan]R[/bold cyan][bold white]AVAN [/white][bold cyan]I[/bold cyan][bold white]NFRA-[/white][bold cyan]X[/bold cyan] [bold white]ULTRA (RQRV)[/white]
-
-[bold yellow]Version:[/bold yellow] v3.6.6 Stable
-[bold yellow]Author:[/bold yellow] Ravan
-[bold yellow]Platform:[/bold yellow] Termux / Android / Linux
-
-[bold green]Features:[/bold green]
-- Advanced CIDR Scanning
-- Multi-threaded Signal Detection
-- Sub-protocol identification (WS/SSH)
-- Reverse DNS Pro Extraction
-- Mobile-optimized Interface
-
-[bold cyan]GitHub:[/bold cyan] https://github.com/bajajravi12/Ravan-infra
-            """
-            console.print(Panel(about_text, title="[bold cyan]ABOUT TOOL[/bold cyan]", border_style="bold cyan", padding=(1, 2)))
-            Prompt.ask("\n[bold yellow]Press ENTER to return[/bold yellow]")
 
 if __name__ == "__main__":
     try:
