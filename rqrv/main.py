@@ -16,7 +16,8 @@ from rich.panel import Panel
 
 def run_scan(target_list, settings, total=0, session_file=None, force_show=False, manual_ports=None):
     scanner = Scanner(settings, session_file=session_file)
-    found = 0
+    found_count = 0
+    seen_hits = set()
     
     # Use manual ports if provided, otherwise scanner defaults
     active_ports = manual_ports if manual_ports else scanner.ports
@@ -29,19 +30,18 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
     else:
         real_total = None # Generator mode
 
+    # Compact progress for Termux/Mobile
     with Progress(
-        SpinnerColumn(spinner_name="earth"),
-        TextColumn("[bold magenta]{task.description}"),
-        TextColumn("{task.fields[current_target]}"),
-        BarColumn(bar_width=None, complete_style="bold green", finished_style="bold cyan"),
+        SpinnerColumn(spinner_name="dots"),
+        TextColumn("[bold magenta]SCANNING[/bold magenta]"),
+        BarColumn(bar_width=10, complete_style="green", finished_style="cyan"), # Narrower bar
         MofNCompleteColumn(),
         TaskProgressColumn(),
-        TextColumn("[blue]Found: {task.fields[found]}"),
-        TimeRemainingColumn(),
+        TextColumn("[blue]HIT: {task.fields[found]}"),
         console=console,
         expand=True
     ) as progress:
-        task = progress.add_task("[bold red]『 HUNTER ACTIVE 』[/bold red]", total=real_total, found=0, current_target="")
+        task = progress.add_task("HUNTING", total=real_total, found=0)
         
         with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
             futures_to_target = {}
@@ -56,24 +56,27 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
                 else:
                     domain = target.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0].strip()
                     scan_ports = active_ports
+                
                 if not domain:
                     progress.update(task, advance=num_ports)
                     continue
+                    
                 for port in scan_ports:
                     f = executor.submit(scanner.scan_port, domain, port)
                     futures_to_target[f] = f"{domain}:{port}"
 
             for future in as_completed(futures_to_target):
                 result = future.result()
-                current_t = futures_to_target[future]
-                progress.update(task, current_target=f"[white]{current_t}[/white]")
-                if result:
-                    found += 1
-                    progress.update(task, found=found)
-                    print_live(result, force_show=force_show, settings=settings)
+                if result and result.get('status') != "ERROR":
+                    hit_id = result['target']
+                    if hit_id not in seen_hits:
+                        seen_hits.add(hit_id)
+                        found_count += 1
+                        progress.update(task, found=found_count)
+                        print_live(result, force_show=force_show, settings=settings)
                 progress.update(task, advance=1)
                 
-    console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found} responding hosts.")
+    console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found_count} unique hits.")
     
     if found > 0:
         save = Prompt.ask("\nSave results to file?", choices=["Y", "N"], default="Y")
@@ -84,6 +87,50 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
             console.print("[yellow]Results were logged to the results/ directory.[/yellow]")
     
     Prompt.ask("\n[bold yellow]Press ENTER to return to menu[/bold yellow]")
+
+def delete_results():
+    from .output import RESULTS_DIR
+    if not RESULTS_DIR.exists():
+        console.print("[bold red]No saved logs to delete![/bold red]")
+        time.sleep(2)
+        return
+        
+    files = [f for f in os.listdir(RESULTS_DIR) if f.endswith(".txt")]
+    if not files:
+        console.print("[bold red]No saved logs to delete![/bold red]")
+        time.sleep(2)
+        return
+
+    while True:
+        console.clear()
+        show_banner()
+        console.print("[bold red]DELETE SAVED LOGS[/bold red]")
+        for i, f in enumerate(files, 1):
+            console.print(f"{i}. {f}")
+        console.print(f"{len(files)+1}. DELETE ALL LOGS")
+        console.print(f"{len(files)+2}. Back")
+        
+        choice = Prompt.ask("\nSelect option", default=str(len(files)+2))
+        
+        if choice.isdigit() and 1 <= int(choice) <= len(files):
+            file_name = files[int(choice)-1]
+            confirm = Prompt.ask(f"Are you sure you want to delete {file_name}?", choices=["Y", "N"], default="N")
+            if confirm.upper() == "Y":
+                os.remove(os.path.join(RESULTS_DIR, file_name))
+                console.print(f"[bold green]Deleted {file_name}[/bold green]")
+                files.pop(int(choice)-1)
+                time.sleep(1)
+            if not files: break
+        elif choice == str(len(files)+1):
+            confirm = Prompt.ask("Are you sure you want to delete ALL logs?", choices=["Y", "N"], default="N")
+            if confirm.upper() == "Y":
+                for f in files:
+                    os.remove(os.path.join(RESULTS_DIR, f))
+                console.print("[bold green]All logs deleted successfully![/bold green]")
+                time.sleep(2)
+                break
+        else:
+            break
 
 def view_results():
     from .output import RESULTS_DIR
@@ -202,7 +249,7 @@ def main():
         show_banner()
         show_menu()
         
-        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9"])
+        choice = Prompt.ask("\n[bold white]INPUT SEC-X[/bold white]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
         
         if choice == "1":
             target = Prompt.ask("Enter Domain or IP")
@@ -238,9 +285,6 @@ def main():
                         else:
                             yield rt
                 
-                # Estimate total matches for progress
-                # Note: This reads the generator once, which is slow for huge files. 
-                # Better to just use None total if it's too big, but let's try to keep it simple.
                 session_file = "bughosts_results.txt"
                 run_scan(target_generator(), settings, session_file=session_file, manual_ports=p)
             else:
@@ -265,17 +309,30 @@ def main():
             ip = Prompt.ask("Enter IP to find CIDR")
             console.print(f"\n[bold cyan]Fetching WHOIS/RDAP data for {ip}...[/bold cyan]")
             result = get_cidr(ip)
-            console.print(f"\n[bold green]IP:[/bold green] {ip}")
-            console.print(f"[bold green]CIDR:[/bold green] [bold yellow]{result}[/bold yellow]")
+            if isinstance(result, dict):
+                table = Table(show_header=False, box=None, padding=(0, 1))
+                table.add_column("Key", style="bold cyan")
+                table.add_column("Value", style="bold yellow")
+                table.add_row("IP", ip)
+                table.add_row("CIDR", result['cidr'])
+                table.add_row("ASN", result['asn'])
+                table.add_row("ORG", result['org'])
+                table.add_row("COUNTRY", result['country'])
+                console.print(Panel(table, title="[bold green]Network Info[/bold green]", border_style="bold green"))
+            else:
+                console.print(f"[bold red]{result}[/bold red]")
             Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]")
 
         elif choice == "7":
             view_results()
 
         elif choice == "8":
+            delete_results()
+
+        elif choice == "9":
             handle_settings(settings)
             
-        elif choice == "9":
+        elif choice == "10":
             console.print("[bold yellow]Exiting...[/bold yellow]")
             sys.exit()
 

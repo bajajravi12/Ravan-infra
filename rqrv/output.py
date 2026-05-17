@@ -18,21 +18,22 @@ def save_result(signal, data, save_enabled=True, infra=None, session_file=None):
         with open(s_file, "a") as f:
             f.write(data + "\n")
 
-    # Map signals to filenames (as requested)
+    # Map signals to filenames
+    # Clean signal for filename
+    clean_signal = "".join([c if c.isalnum() else "_" for c in signal]).lower()
+    
+    # Specific mappings for consistency if needed
     file_map = {
-        "Protocol Upgrade Seen": "protocol_upgrade.txt",
+        "CloudFront SSH Proxy + SNI": "ssh_proxy.txt",
+        "Cloudflare WS Proxy Active": "ws_proxy.txt",
+        "Switching Protocols Active": "protocol_upgrade.txt",
         "HTTP Responsive": "http_responsive.txt",
-        "Restricted but Live": "restricted_live.txt",
-        "Endpoint Responding": "endpoint_responding.txt"
+        "Restricted but Live": "restricted.txt",
+        "SSH Payload Proxy Found": "ssh_payload.txt"
     }
     
-    # Categorize by infra if available
-    if infra:
-        infra_file = os.path.join(RESULTS_DIR, f"{infra.lower()}.txt")
-        with open(infra_file, "a") as f:
-            f.write(data + "\n")
-
-    filename = file_map.get(signal, "other_hits.txt")
+    filename = file_map.get(signal, f"{clean_signal}.txt")
+    if len(filename) > 50: filename = "other_hits.txt"
     
     # Signal-based file
     cat_file = os.path.join(RESULTS_DIR, filename)

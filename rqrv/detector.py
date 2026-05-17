@@ -4,6 +4,8 @@ def identify_infra(headers, status_code):
     x_cache = headers.get('X-Cache', '').lower()
     cf_ray = headers.get('CF-RAY', '')
     upgrade = headers.get('Upgrade', '').lower()
+    alt_svc = headers.get('Alt-Svc', '').lower()
+    connection = headers.get('Connection', '').lower()
     
     # Logic based on headers with specific requested colors
     cdn, color = "UNKNOWN", "bright_black"
@@ -23,7 +25,7 @@ def identify_infra(headers, status_code):
         cdn, color = "SQUID", "green"
     elif 'haproxy' in server.lower() or 'haproxy' in via:
         cdn, color = "HAPROXY", "bright_white"
-    elif 'amz' in str(headers).lower() or 'amazon' in server.lower():
+    elif 'amz' in str(headers).lower() or 'amazon' in server.lower() or 'awselb' in str(headers).lower():
         cdn, color = "AWS-ORIGIN", "cyan"
     elif 'nginx' in server.lower():
         cdn, color = "NGINX", "green"
@@ -31,40 +33,72 @@ def identify_infra(headers, status_code):
         cdn, color = "APACHE", "yellow"
     elif 'iis' in server.lower() or 'microsoft' in server.lower():
         cdn, color = "IIS", "white"
+    elif server.lower() == "gws" or "google" in server.lower():
+        cdn, color = "GOOGLE", "bright_red"
     elif via or any(h in headers for h in ['x-forwarded-for', 'forwarded', 'x-real-ip', 'x-proxy-id', 'x-varnish', 'x-squid-error']):
         cdn, color = "REV-PROXY", "bright_magenta"
     
-    # Method Suggestion based on Infra
+    # Advanced Method Detection Heuristics
     method = "DIRECT/HTTP"
-    if cdn == "CLOUDFLARE":
-        method = "WS/GRPC"
+    if status_code == 101:
+        if cdn == "CLOUDFRONT":
+            method = "WS/SSH"
+        elif cdn == "CLOUDFLARE":
+            method = "WS/GRPC"
+        else:
+            method = "WS/PAYLOAD"
+    elif cdn == "CLOUDFLARE":
+        method = "WS/SSH+SNI"
     elif cdn == "CLOUDFRONT":
         method = "CDN/SSL"
     elif cdn == "FASTLY":
         method = "EDGE/PUSH"
     elif cdn == "AKAMAI":
         method = "GHOST/HTTP"
+    elif "h3=" in alt_svc or "h2=" in alt_svc:
+        method = "QUIC/HTTP3"
     elif cdn in ["VARNISH", "SQUID", "HAPROXY", "REV-PROXY"]:
         method = "PROXY-TUNNEL"
     elif "proxy" in str(headers).lower() or "via" in headers:
         method = "REVERSE-PROXY"
+    elif status_code == 200:
+        method = "SSL PAYLOAD"
 
-    # Signal Classification
+    # Signal Classification (Cleaned from HTML)
     signal = "Unknown Activity"
     high_signal = False
     
-    if status_code == 101 or upgrade or "websocket" in str(headers).lower():
-        signal = "Protocol Upgrade Seen"
+    if status_code == 101:
+        if cdn == "CLOUDFRONT":
+            signal = "CloudFront SSH Proxy + SNI"
+        elif cdn == "CLOUDFLARE":
+            signal = "Cloudflare WS Proxy Active"
+        else:
+            signal = "Switching Protocols Active"
         high_signal = True
-    elif status_code in [200, 201, 204, 301, 302, 307, 308]:
+    elif upgrade == "websocket" or "websocket" in connection:
+        signal = "WebSocket Upgrade Support"
+        high_signal = True
+    elif status_code in [200, 201, 204]:
         signal = "HTTP Responsive"
+        if cdn != "UNKNOWN": signal = f"{cdn} Payload Compatible"
+    elif status_code in [301, 302, 307, 308]:
+        signal = "Redirect Loop/Live"
     elif status_code in [401, 403]:
         signal = "Restricted but Live"
     elif status_code == 404:
         signal = "Endpoint Responding"
+    elif status_code == 101: # Redundant but safe
+        signal = "Protocol Upgrade Seen"
+        high_signal = True
 
-    # Specific "Interesting" combinations
-    if high_signal or (cdn != "UNKNOWN" and status_code in [101, 200, 403]) or status_code == 101:
+    # SSH Payload Detection specific
+    if status_code == 101 and ("ssh" in server.lower() or "ssh" in str(headers).lower()):
+        signal = "SSH Payload Proxy Found"
+        method = "SSH+WS"
+
+    # Final logic for high signal
+    if high_signal or (cdn != "UNKNOWN" and status_code in [101, 200, 403]):
         high_signal = True
 
     return {
@@ -74,5 +108,5 @@ def identify_infra(headers, status_code):
         "server": server,
         "signal": signal,
         "high_signal": high_signal,
-        "proxy": "Responsive" if via or "proxy" in str(headers).lower() else "Direct"
+        "proxy": "Responsive" if (via or "proxy" in str(headers).lower() or cdn != "UNKNOWN") else "Direct"
     }

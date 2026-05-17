@@ -9,6 +9,7 @@ except ImportError:
 
 from .detector import identify_infra
 from .output import save_result
+from .utils import reverse_dns
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -18,6 +19,7 @@ class Scanner:
         self.session_file = session_file
         self.session = requests.Session()
         self.dns_cache = {}
+        self.rdns_cache = {}
         self.adapter = requests.adapters.HTTPAdapter(
             pool_connections=settings['threads'], 
             pool_maxsize=settings['threads'],
@@ -95,10 +97,15 @@ class Scanner:
                     if status_code in live_codes:
                         infra_info = identify_infra(headers, status_code)
                         ip = self.get_ip(domain)
+                        
+                        if ip not in self.rdns_cache:
+                            self.rdns_cache[ip] = reverse_dns(ip)
+                        rdns = self.rdns_cache[ip]
 
                         result = {
                             "target": f"{domain}:{port}",
                             "ip": ip,
+                            "dns": rdns,
                             "type": infra_info['infra'],
                             "color": infra_info['color'],
                             "status": status_code,

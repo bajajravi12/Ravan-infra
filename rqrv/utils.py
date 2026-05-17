@@ -31,19 +31,41 @@ def detect_target_type(target):
 
 def reverse_dns(ip):
     try:
-        return socket.gethostbyaddr(ip)[0]
+        socket.setdefaulttimeout(2)
+        host = socket.gethostbyaddr(ip)[0]
+        return host
     except:
-        return "Not Found"
+        return "Unknown Host"
 
 def get_cidr(ip):
     try:
+        # Use a more reliable way to get CIDR/ASN info that works in Termux
+        # ipwhois often fails due to DNS issues in restricted environments
         from ipwhois import IPWhois
+        import warnings
+        warnings.filterwarnings("ignore")
+        
         obj = IPWhois(ip)
-        results = obj.lookup_rdap(depth=1)
-        # Try to find the smallest CIDR or the one in the network section
-        if results.get('network') and results['network'].get('cidr'):
-            return results['network']['cidr']
-        return "CIDR not found in WHOIS data"
+        # Avoid rdap if it's causing resolv.conf issues, try legacy whois first or handle error
+        try:
+            results = obj.lookup_rdap(depth=1)
+        except Exception:
+            results = obj.lookup_whois()
+
+        network = results.get('network', {})
+        asn = results.get('asn', 'N/A')
+        country = results.get('asn_country_code', 'N/A')
+        
+        # Build a detailed response
+        cidr_val = network.get('cidr', 'N/A')
+        org = network.get('name', network.get('org', 'N/A'))
+        
+        return {
+            "cidr": cidr_val,
+            "asn": f"AS{asn}",
+            "org": org.upper(),
+            "country": country
+        }
     except Exception as e:
         return f"Error: {str(e)}"
 

@@ -32,8 +32,9 @@ def show_menu():
     table.add_row("🔍 [5]", "[bold bright_white]REVERSE DNS PRO[/bold bright_white]")
     table.add_row("🌐 [6]", "[bold green]IP TO CIDR FINDER[/bold green]")
     table.add_row("📂 [7]", "[bold yellow]VIEW SAVED LOGS[/bold yellow]")
-    table.add_row("⚙️ [8]", "[bold white]HUNTER SETTINGS[/bold white]")
-    table.add_row("❌ [9]", "[bold red]EXIT PROGRAM[/bold red]")
+    table.add_row("🗑️ [8]", "[bold red]DELETE SAVED LOGS[/bold red]")
+    table.add_row("⚙️ [9]", "[bold white]HUNTER SETTINGS[/bold white]")
+    table.add_row("❌ [10]", "[bold red]EXIT PROGRAM[/bold red]")
     
     console.print(Panel(table, title="[bold red]──『 RAVAN CONTROL CENTER 』──[/bold red]", border_style="bold green", padding=(1, 1)))
 
@@ -54,6 +55,9 @@ def show_hit_panel(res):
     
     target_val = f"[bold yellow]{res['target']}[/bold yellow]"
     table.add_row("Proxy", target_val)
+
+    if res.get('dns'):
+        table.add_row("DNS", f"[magenta]{res['dns']}[/magenta]")
     
     server_val = res.get('server', 'Unknown')
     if res.get('type') != "UNKNOWN" and res.get('type') != "SSL_HANDSHAKE_FAILURE":
@@ -61,7 +65,7 @@ def show_hit_panel(res):
     table.add_row("Server", server_val)
     
     if status_code == 101:
-        status_text = f"{protocol} 101 [bold red]KennXV Switching Protocols[/bold red]"
+        status_text = f"{protocol} 101 [bold yellow]Switching Protocols[/bold yellow]"
     elif status_code == "SSL_ERR":
         status_text = f"{protocol} [bold red]SSL Handshake Failure[/bold red]"
     else:
@@ -70,15 +74,19 @@ def show_hit_panel(res):
     table.add_row("Status", status_text)
     
     if res.get('proxy'):
-        table.add_row("Method", f"[bold cyan]{res.get('method', 'GET')}[/bold cyan]")
+        table.add_row("Method", f"[bold cyan]{res.get('method', 'HTTP')}[/bold cyan]")
     
     table.add_row("Signal", f"[bold {res.get('color', 'green')}]{res['signal']}[/bold {res.get('color', 'green')}]")
+
+    tls_status = res.get('tls', 'Enabled')
+    table.add_row("TLS", f"[bold green]{tls_status}[/bold green]" if tls_status == "Enabled" else f"[bold red]{tls_status}[/bold red]")
     
     panel = Panel(
         table,
         title=title,
         border_style=border_style,
-        expand=False
+        expand=False,
+        padding=(0, 1)
     )
     console.print(panel)
 
