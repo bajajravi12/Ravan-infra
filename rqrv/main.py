@@ -103,8 +103,8 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
                 while not scanner.stop_event.is_set():
                     try:
                         # Non-blocking check for input
-                        ready, _, _ = select.select([sys.stdin], [], [], 0.1)
-                        if ready:
+                        ready, _, _ = select.select([sys.stdin], [], [], 0.2)
+                        if ready and not scanner.stop_event.is_set():
                             line = sys.stdin.readline().strip().lower()
                             if not line: continue
                             cmd = line[0]
@@ -124,106 +124,113 @@ def run_scan(target_list, settings, total=0, session_file=None, force_show=False
             t = threading.Thread(target=control_listener, daemon=True)
             t.start()
 
-        with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
-            futures_to_target = {}
-            
-            # Use iterator for non-blocking stream processing
-            target_iter = iter(target_list)
-            
-            # Skip for resume
-            if start_index > 0:
-                for _ in range(start_index):
-                    try: next(target_iter)
-                    except StopIteration: break
-
-            finished = False
-            while not finished and not scanner.stop_event.is_set():
-                # Fill batch dynamically
-                batch_size = max(1, settings['threads'] * 2)
-                batch = []
-                for _ in range(batch_size):
-                    try:
-                        val = next(target_iter)
-                        if val: batch.append(val)
-                    except StopIteration:
-                        finished = True
-                        break
-                
-                if not batch: break
-                
+        try:
+            with ThreadPoolExecutor(max_workers=settings['threads']) as executor:
                 futures_to_target = {}
-                for target in batch:
-                    # Deduplicate at the target list level
-                    if target in seen_hits:
-                        progress.update(task, advance=num_ports)
-                        current_index += 1
-                        continue
+                
+                # Use iterator for non-blocking stream processing
+                target_iter = iter(target_list)
+                
+                # Skip for resume
+                if start_index > 0:
+                    for _ in range(start_index):
+                        try: next(target_iter)
+                        except StopIteration: break
 
-                    if ':' in target and not target.startswith('http'):
-                        parts = target.split(':')
-                        domain = parts[0].strip()
+                finished = False
+                while not finished and not scanner.stop_event.is_set():
+                    # Fill batch dynamically
+                    batch_size = max(1, settings['threads'] * 2)
+                    batch = []
+                    for _ in range(batch_size):
                         try:
-                            scan_ports = [int(parts[1])]
-                        except:
+                            val = next(target_iter)
+                            if val: batch.append(val)
+                        except StopIteration:
+                            finished = True
+                            break
+                    
+                    if not batch: break
+                    
+                    futures_to_target = {}
+                    for target in batch:
+                        # Deduplicate at the target list level
+                        if target in seen_hits:
+                            progress.update(task, advance=num_ports)
+                            current_index += 1
+                            continue
+
+                        if ':' in target and not target.startswith('http'):
+                            parts = target.split(':')
+                            domain = parts[0].strip()
+                            try:
+                                scan_ports = [int(parts[1])]
+                            except:
+                                scan_ports = active_ports
+                        else:
+                            domain = target.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0].strip()
                             scan_ports = active_ports
-                    else:
-                        domain = target.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0].strip()
-                        scan_ports = active_ports
-                    
-                    if not domain:
-                        progress.update(task, advance=num_ports)
-                        current_index += 1
-                        continue
                         
-                    for port in scan_ports:
-                        f = executor.submit(scanner.scan_port, domain, port)
-                        futures_to_target[f] = f"{domain}:{port}"
-
-                for future in as_completed(futures_to_target):
-                    if scanner.stop_event.is_set(): break
-                    
-                    t_str = futures_to_target[future]
-                    progress.update(task, target=t_str)
-                    
-                    result = future.result()
-                    if result and result.get('status') != "ERROR":
-                        # Deduplicate by IP:PORT as requested
-                        hit_id = f"{result['ip']}:{result['port']}"
-                        if hit_id not in seen_hits:
-                            seen_hits.add(hit_id)
-                            found_count += 1
-                            progress.update(task, found=found_count)
-                            print_live(result, force_show=force_show, settings=settings)
+                        if not domain:
+                            progress.update(task, advance=num_ports)
+                            current_index += 1
+                            continue
                             
-                            # Auto-save notification logic
-                            infra = result.get('type')
-                            if infra == "CLOUDFRONT":
-                                console.print("[cyan]☁ CLOUDFRONT DETECTED → saved to results/cloudfront_hits.txt[/cyan]")
-                            elif infra == "CLOUDFLARE":
-                                console.print("[magenta]☁ CLOUDFLARE DETECTED → saved to results/cloudflare_hits.txt[/magenta]")
-                    
-                    progress.update(task, advance=1)
-                
-                current_index += len(batch)
-                
-                # Save progress periodically
-                if state_meta:
-                    state_meta['current_index'] = current_index
-                    state_meta['found_count'] = found_count
-                    save_session(state_meta)
+                        for port in scan_ports:
+                            f = executor.submit(scanner.scan_port, domain, port)
+                            futures_to_target[f] = f"{domain}:{port}"
 
-    if scanner.stop_event.is_set():
-        console.print(f"\n[bold yellow]Scan stopped at index {current_index}. Session saved.[/bold yellow]")
-    else:
-        console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found_count} unique hits.")
-        clear_session()
-    
+                    for future in as_completed(futures_to_target):
+                        if scanner.stop_event.is_set(): break
+                        
+                        t_str = futures_to_target[future]
+                        progress.update(task, target=t_str)
+                        
+                        result = future.result()
+                        if result and result.get('status') != "ERROR":
+                            # Deduplicate by IP:PORT as requested
+                            hit_id = f"{result['ip']}:{result['port']}"
+                            if hit_id not in seen_hits:
+                                seen_hits.add(hit_id)
+                                found_count += 1
+                                progress.update(task, found=found_count)
+                                print_live(result, force_show=force_show, settings=settings)
+                                
+                                # Auto-save notification logic
+                                infra = result.get('type')
+                                if infra == "CLOUDFRONT":
+                                    console.print("[cyan]☁ CLOUDFRONT DETECTED → saved to results/cloudfront_hits.txt[/cyan]")
+                                elif infra == "CLOUDFLARE":
+                                    console.print("[magenta]☁ CLOUDFLARE DETECTED → saved to results/cloudflare_hits.txt[/magenta]")
+                        
+                        progress.update(task, advance=1)
+                    
+                    current_index += len(batch)
+                    
+                    # Save progress periodically
+                    if state_meta:
+                        state_meta['current_index'] = current_index
+                        state_meta['found_count'] = found_count
+                        save_session(state_meta)
+        finally:
+            interrupted = scanner.stop_event.is_set()
+            # Ensure background control thread stops before we prompt for next input
+            scanner.stop_event.set()
+            scanner.pause_event.set()
+            time.sleep(0.3) # Increased buffer for Termux cleanup
+            
+            if interrupted:
+                console.print(f"\n[bold yellow]Scan stopped at index {current_index}. Session saved.[/bold yellow]")
+            else:
+                console.print(f"\n[bold green]SCAN COMPLETE![/bold green] Found {found_count} unique hits.")
+                clear_session()
+
     if found_count > 0:
         save = Prompt.ask("\nSave results to file?", choices=["Y", "N"], default="Y")
         if save.upper() == "N":
             console.print("[yellow]Results were already logged to the results/ directory.[/yellow]")
     
-    Prompt.ask("\n[bold yellow]Press ENTER to return to menu[/bold yellow]")
+    Prompt.ask("\n[bold yellow]Press ENTER to return to menu[/bold yellow]", default="")
 
 def view_results():
     from .output import RESULTS_DIR
@@ -282,7 +289,7 @@ def view_results():
                             table.add_row(line.strip(), "", "", "", "", "")
                 
                 console.print(table)
-                Prompt.ask("\n[bold yellow]Press ENTER to go back[/bold yellow]")
+                Prompt.ask("\n[bold yellow]Press ENTER to go back[/bold yellow]", default="")
             elif file_choice == "2":
                 confirm = Prompt.ask(f"Are you sure you want to delete {file_name}?", choices=["Y", "N"], default="N")
                 if confirm.upper() == "Y":
@@ -314,7 +321,7 @@ def handle_settings(settings):
         console.print(f"5. Save Results: [yellow]{settings['save_results']}[/yellow]")
         console.print("6. Back to Main Menu")
         
-        choice = Prompt.ask("\nSelect option", choices=["1", "2", "3", "4", "5", "6"])
+        choice = Prompt.ask("\nSelect option", choices=["1", "2", "3", "4", "5", "6"], default="6")
         
         if choice == "1":
             t = Prompt.ask("Enter threads", default=str(settings['threads']))
@@ -326,7 +333,7 @@ def handle_settings(settings):
             settings['http2'] = not settings.get('http2', True)
         elif choice == "4":
             console.print("\n[cyan]Enter new high signals separated by comma (e.g. CloudFront, 101, Cloudflare)[/cyan]")
-            val = Prompt.ask("High Signals")
+            val = Prompt.ask("High Signals", default="")
             if val:
                 settings['high_signals'] = [v.strip() for v in val.split(',')]
         elif choice == "5":
@@ -337,7 +344,7 @@ def handle_settings(settings):
         save_settings(settings)
 
 def get_manual_ports():
-    ports_input = Prompt.ask("Enter Ports (e.g. 80,443,8080) or blank for default")
+    ports_input = Prompt.ask("Enter Ports (e.g. 80,443,8080) or blank for default", default="")
     if not ports_input.strip():
         return None
     try:
@@ -475,7 +482,7 @@ def main():
             if isinstance(results, list):
                 for d in results: console.print(f"- {d}")
             else: console.print(f"- {results}")
-            Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]")
+            Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]", default="")
 
         elif choice == "6":
             ip = custom_prompt("IP TO CIDR", "Enter IP")
@@ -485,7 +492,7 @@ def main():
                 table.add_row("IP", ip); table.add_row("CIDR", result['cidr']); table.add_row("ASN", result['asn'])
                 console.print(Panel(table, title="[bold green]Network Info[/bold green]", border_style="bold green"))
             else: console.print(f"[bold red]{result}[/bold red]")
-            Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]")
+            Prompt.ask("\n[bold yellow]Press ENTER to continue[/bold yellow]", default="")
 
         elif choice == "7":
             view_results()
