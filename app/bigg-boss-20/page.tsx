@@ -1,6 +1,8 @@
 import Link from "next/link";
 import {getEpisodes} from "@/lib/episodes";
 
+export const dynamic="force-dynamic";
+
 export default function BiggBoss(){
   const episodes=getEpisodes().sort((a,b)=>b.episodeNo-a.episodeNo);
   return <section className="shell page">
