@@ -1,21 +1,21 @@
-"use client";
-
-import {useState} from "react";
-
 export default function PlayerFrame({src,title}:{src:string;title:string}){
-  const [size,setSize]=useState<"compact"|"normal"|"large">("normal");
-  return <div className={"playerShell player-"+size}>
+  return <div className="playerShell">
     <div className="playerToolbar">
       <span>Player Size</span>
       <div className="playerSizes">
-        <button onClick={()=>setSize("compact")} className={size==="compact"?"active":""}>Small</button>
-        <button onClick={()=>setSize("normal")} className={size==="normal"?"active":""}>Normal</button>
-        <button onClick={()=>setSize("large")} className={size==="large"?"active":""}>Large</button>
+        <input id="player-small" name="player-size" type="radio" defaultChecked />
+        <label htmlFor="player-small">Small</label>
+        <input id="player-normal" name="player-size" type="radio" />
+        <label htmlFor="player-normal">Normal</label>
+        <input id="player-large" name="player-size" type="radio" />
+        <label htmlFor="player-large">Large</label>
       </div>
     </div>
-    <div className="playerWrap">
-      <iframe src={src} title={title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
-      <div className="playerFallback">Player load na ho to <a href={src} target="_blank" rel="noreferrer">Open Player ↗</a></div>
+    <div className="playerStage">
+      <div className="playerWrap">
+        <iframe src={src} title={title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+        <div className="playerFallback">Player load na ho to <a href={src} target="_blank" rel="noreferrer">Open Player ↗</a></div>
+      </div>
     </div>
   </div>;
 }
