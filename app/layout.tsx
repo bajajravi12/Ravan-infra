@@ -8,7 +8,7 @@ export default function RootLayout({children}:{children:React.ReactNode}){
     <header className="topbar">
       <div className="shell nav">
         <Link href="/" className="brand"><span>AL</span><strong>AARVI LIVE</strong></Link>
-        <nav><Link href="/">Home</Link><Link href="/bigg-boss-20">Bigg Boss 20</Link><Link href="/admin">Admin</Link></nav>
+        <nav><Link href="/">Home</Link><Link href="/bigg-boss-20">Bigg Boss 20</Link></nav>
       </div>
     </header>
     <main>{children}</main>
