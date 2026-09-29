@@ -1,4 +1,8 @@
+import HlsPlayer from "./HlsPlayer";
+
 export default function PlayerFrame({src,title}:{src:string;title:string}){
+  const isHls = /\.m3u8(?:$|\?)/i.test(src);
+
   return <div className="playerShell">
     <div className="playerToolbar">
       <span>Player Size</span>
@@ -11,10 +15,22 @@ export default function PlayerFrame({src,title}:{src:string;title:string}){
         <label htmlFor="player-large">Large</label>
       </div>
     </div>
+
     <div className="playerStage">
       <div className="playerWrap">
-        <iframe src={src} title={title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
-        <div className="playerFallback">Player load na ho to <a href={src} target="_blank" rel="noreferrer">Open Player ↗</a></div>
+        {isHls ? (
+          <HlsPlayer src={src} title={title} />
+        ) : (
+          <iframe
+            src={src}
+            title={title}
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+          />
+        )}
+        <div className="playerFallback">
+          Player load na ho to <a href={src} target="_blank" rel="noreferrer">Open Player ↗</a>
+        </div>
       </div>
     </div>
   </div>;
