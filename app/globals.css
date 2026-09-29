@@ -3,3 +3,32 @@
 .playerShell{width:100%}.playerToolbar{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:10px 12px;background:#0f131b;border:1px solid #262b35;border-bottom:0;border-radius:14px 14px 0 0;color:#9299a8;font-size:12px}.playerSizes{display:flex;gap:6px}.playerSizes button{border:1px solid #303644;background:#171c27;color:#cbd0da;border-radius:7px;padding:6px 9px;font-size:11px;cursor:pointer}.playerSizes button.active{background:#e51d63;border-color:#e51d63;color:#fff}.playerShell .playerWrap{border-radius:0 0 14px 14px}.player-compact .playerWrap iframe{height:min(52vw,560px);min-height:260px}.player-normal .playerWrap iframe{height:min(62vw,720px);min-height:300px}.player-large .playerWrap iframe{height:min(72vw,900px);min-height:340px}
 @media(min-width:1000px){.watchPage{width:min(1240px,calc(100% - 48px))}.playerShell{max-width:1240px;margin:0 auto}.player-normal .playerWrap iframe{height:min(56vw,700px)}.player-large .playerWrap iframe{height:min(64vw,820px)}}
 @media(max-width:560px){.playerToolbar{justify-content:space-between;gap:7px;padding:8px}.playerSizes button{padding:6px 7px}.player-compact .playerWrap iframe{height:52vw;min-height:210px}.player-normal .playerWrap iframe{height:60vw;min-height:230px}.player-large .playerWrap iframe{height:70vw;min-height:250px}.watchPage{padding-top:18px}}
+
+.playerShell{width:100%}
+.playerToolbar{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:10px 12px;background:#0f131b;border:1px solid #262b35;border-bottom:0;border-radius:14px 14px 0 0;color:#9299a8;font-size:12px}
+.playerSizes{display:flex;gap:6px;align-items:center}
+.playerSizes input{position:absolute;opacity:0;pointer-events:none}
+.playerSizes label{border:1px solid #303644;background:#171c27;color:#cbd0da;border-radius:7px;padding:6px 9px;font-size:11px;cursor:pointer}
+#player-small:checked~label[for="player-small"],#player-normal:checked~label[for="player-normal"],#player-large:checked~label[for="player-large"]{background:#e51d63;border-color:#e51d63;color:#fff}
+.playerStage{width:100%}
+.playerShell .playerWrap{border-radius:0 0 14px 14px}
+.playerWrap iframe{width:100%;border:0;display:block}
+.player-normal:checked{}
+#player-small:checked~label~.playerStage .playerWrap iframe{height:min(52vw,560px);min-height:260px}
+#player-normal:checked~label~.playerStage .playerWrap iframe{height:min(62vw,720px);min-height:300px}
+#player-large:checked~label~.playerStage .playerWrap iframe{height:min(72vw,900px);min-height:340px}
+@media(min-width:1000px){
+  .watchPage{width:min(1240px,calc(100% - 48px))}
+  .playerShell{max-width:1240px;margin:0 auto}
+  #player-small:checked~label~.playerStage .playerWrap iframe{height:min(42vw,560px)}
+  #player-normal:checked~label~.playerStage .playerWrap iframe{height:min(56vw,700px)}
+  #player-large:checked~label~.playerStage .playerWrap iframe{height:min(64vw,820px)}
+}
+@media(max-width:560px){
+  .playerToolbar{justify-content:space-between;gap:7px;padding:8px}
+  .playerSizes label{padding:6px 7px}
+  #player-small:checked~label~.playerStage .playerWrap iframe{height:52vw;min-height:210px}
+  #player-normal:checked~label~.playerStage .playerWrap iframe{height:60vw;min-height:230px}
+  #player-large:checked~label~.playerStage .playerWrap iframe{height:70vw;min-height:250px}
+  .watchPage{padding-top:18px}
+}
