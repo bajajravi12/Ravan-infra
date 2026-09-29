@@ -4,7 +4,7 @@ import {getEpisodes} from "@/lib/episodes";
 export const dynamic="force-dynamic";
 
 export default async function BiggBoss(){
-  const episodes=await getEpisodes().sort((a,b)=>b.episodeNo-a.episodeNo);
+  const episodes=(await getEpisodes()).sort((a,b)=>b.episodeNo-a.episodeNo);
   return <section className="shell page">
     <div className="sectionHead"><div><div className="eyebrow">COLORS TV</div><h1>Bigg Boss 20</h1><p>{episodes.length} episode{episodes.length!==1?"s":""} available</p></div></div>
     <div className="grid">
