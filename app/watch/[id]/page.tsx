@@ -7,7 +7,7 @@ export const dynamic="force-dynamic";
 
 export default async function Watch({params}:{params:Promise<{id:string}>}){
   const {id}=await params;
-  const episodes=getEpisodes().sort((a,b)=>b.episodeNo-a.episodeNo);
+  const episodes=(await getEpisodes()).sort((a,b)=>b.episodeNo-a.episodeNo);
   const ep=episodes.find(x=>x.id===id);
   if(!ep) notFound();
   const index=episodes.findIndex(x=>x.id===id);
