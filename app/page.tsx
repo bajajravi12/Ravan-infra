@@ -3,8 +3,8 @@ import {getEpisodes} from "@/lib/episodes";
 
 export const dynamic="force-dynamic";
 
-export default function Home(){
-  const episodes=getEpisodes().sort((a,b)=>b.episodeNo-a.episodeNo);
+export default async function Home(){
+  const episodes=await getEpisodes().sort((a,b)=>b.episodeNo-a.episodeNo);
   return <div className="hero">
     <div className="shell heroInner">
       <div className="eyebrow">AARVI LIVE</div>
