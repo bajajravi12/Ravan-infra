@@ -61,8 +61,9 @@ export default function HlsPlayer({ src, title }: { src: string; title: string }
       className="hlsVideo"
       style={{
         width: "100%",
-        height: "100%",
+        height: "auto",
         display: "block",
+        aspectRatio: "16 / 9",
         objectFit: "contain",
         background: "#000",
       }}
