@@ -15,7 +15,7 @@ export default async function Watch({params}:{params:Promise<{id:string}>}){
   const prev=episodes[index+1];
   return <section className="shell watchPage">
     <Link className="back" href="/bigg-boss-20">← All Episodes</Link>
-    <PlayerFrame src={ep.playerUrl} title={ep.title} />
+    <PlayerFrame src={ep.playerUrl} title={ep.title} episodeId={ep.id} />
     <div className="watchInfo"><div><div className="eyebrow">EPISODE {ep.episodeNo}</div><h1>{ep.title}</h1><p>{ep.date}</p></div><div className="episodeNav">{prev&&<Link href={"/watch/"+prev.id}>← Previous</Link>}{next&&<Link href={"/watch/"+next.id}>Next →</Link>}</div></div>
   </section>;
 }
