@@ -62,14 +62,14 @@ export default function Admin(){
   </section>;
 
   return <section className="shell page admin">
-    <div className="sectionHead"><div><div className="eyebrow">CONTROL PANEL</div><h1>Episode Admin</h1><p>Future me naye episodes, title aur player links yahin se manage karo.</p></div></div>
+    <div className="sectionHead"><div><div className="eyebrow">CONTROL PANEL</div><h1>Episode Admin</h1><p>Future me naye episodes aur source links yahin se manage karo.</p></div></div>
     <div className="adminGrid">
       <form className="panel" onSubmit={submit}>
         <h2>{editing?"Edit Episode":"Add New Episode"}</h2>
         <label>Episode No.<input value={form.episodeNo} onChange={e=>setForm({...form,episodeNo:e.target.value})} type="number" min="1" required/></label>
         <label>Episode Title<input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="Bigg Boss 20 — 27 September 2026" required/></label>
         <label>Episode Date<input value={form.date} onChange={e=>setForm({...form,date:e.target.value})} type="date" required/></label>
-        <label>Player / Video URL<input value={form.playerUrl} onChange={e=>setForm({...form,playerUrl:e.target.value})} placeholder="https://..." type="url" required/></label>
+        <label>Source / Gofile URL<input value={form.playerUrl} onChange={e=>setForm({...form,playerUrl:e.target.value})} placeholder="https://articleweb.xyz/vid/gofile.php?id=..." type="url" required/></label>
         <button className="primary" type="submit">{editing?"✓ Update Episode":"＋ Add Episode"}</button>
         {editing&&<button type="button" className="secondary cancelBtn" onClick={()=>{setEditing(null);setForm(blank)}}>Cancel Edit</button>}
         {msg&&<div className="msg">{msg}</div>}
