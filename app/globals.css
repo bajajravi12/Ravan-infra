@@ -13,3 +13,5 @@
 #player-large:checked~label~.playerStage .playerWrap iframe{aspect-ratio:16/9}
 @media(min-width:1000px){.watchPage{width:min(1280px,calc(100% - 48px))}.playerShell{max-width:1280px}}
 @media(max-width:560px){.playerToolbar{justify-content:space-between;gap:7px;padding:8px}.playerSizes label{padding:6px 7px}.watchPage{padding-top:18px}}
+
+.fullscreenBtn{border:1px solid #343b49;background:#171c27;color:#e8ebf0;border-radius:8px;padding:7px 11px;font-size:11px;font-weight:700;cursor:pointer}.fullscreenBtn:hover{background:#242b39}.playerWrap:fullscreen{width:100vw;height:100vh;border:0;border-radius:0;background:#000;display:flex;align-items:center;justify-content:center}.playerWrap:fullscreen iframe,.playerWrap:fullscreen video{width:100%;height:100%;max-width:100vw;max-height:100vh;aspect-ratio:auto;object-fit:contain;border:0}.playerWrap:fullscreen .playerFallback{display:none}@media(max-width:560px){.playerToolbar{justify-content:flex-end;gap:7px;padding:8px}.fullscreenBtn{padding:7px 10px}.playerShell .playerWrap iframe{min-height:230px}}
