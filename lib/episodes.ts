@@ -24,6 +24,19 @@ function db(){
   return process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
 }
 
+const SOURCE_URL_MIGRATIONS: Record<number, string> = {
+  14: "https://articleweb.xyz/vid/gofile.php?id=c_o1kLYy0mLtPA",
+  15: "https://articleweb.xyz/vid/gofile.php?id=88YgNUCmaUzK2w",
+  16: "https://articleweb.xyz/vid/gofile.php?id=yUsNPNBn98TdeQ",
+  17: "https://articleweb.xyz/vid/gofile.php?id=LFz4HJAS924syA",
+  18: "https://articleweb.xyz/vid/gofile.php?id=DZyVommnhMBrPw",
+  19: "https://articleweb.xyz/vid/gofile.php?id=wJc__5OC63W9DA",
+  20: "https://articleweb.xyz/vid/gofile.php?id=89pbEp1i_zhi1g",
+  21: "https://articleweb.xyz/vid/gofile.php?id=OfhO74WIGZrj2Q",
+  22: "https://articleweb.xyz/vid/gofile.php?id=jjDh0ejkvVJtKw",
+  23: "https://articleweb.xyz/vid/gofile.php?id=_xPpLZssg6ZFCQ"
+};
+
 async function ensureTable(sql:any){
   await sql`CREATE TABLE IF NOT EXISTS episodes (
     id TEXT PRIMARY KEY,
@@ -39,6 +52,14 @@ export async function getEpisodes():Promise<Episode[]>{
   if(!sql) return fileEpisodes();
 
   await ensureTable(sql);
+
+  for (const [episodeNo, sourceUrl] of Object.entries(SOURCE_URL_MIGRATIONS)) {
+    await sql`UPDATE episodes
+      SET player_url = ${sourceUrl}
+      WHERE episode_no = ${Number(episodeNo)}
+        AND player_url NOT LIKE 'https://articleweb.xyz/%'`;
+  }
+
   const rows=await sql`SELECT id, episode_no, title, date, player_url
     FROM episodes ORDER BY episode_no DESC`;
 
