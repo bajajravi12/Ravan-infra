@@ -1,7 +1,8 @@
 import {AnalyticsTracker} from "@/app/AnalyticsTracker";
+import PlayerFrame from "@/app/watch/PlayerFrame";
 
-const MOVIE_PLAYER =
-  "https://hbplay.pages.dev/?u=aHR0cHM6Ly9jZG4ubGVuaW4uYnV6ei9EcmlzaHlhbTMgLSBUaGUgQ29uY2x1c2lvbiAyMDI2IEJvbGx5d29vZCBIaW5kaSBNb3ZpZSBQcmVEdkQgNzIwcC5ta3Y/dG9rZW49NWJjNzlkNmQ1MThjZDdmOGViMjc0MDE1ZDUyMDNlZjA=&m=dmlkZW8veC1tYXRyb3Nr&t=RHJpc2h5YW0zIC0gVGhlIENvbmNsdXNpb24gKDIwMjYpIEJvbGx5d29vZCBIaW5kaSBNb3ZpZSBQcmVEdkQgNzIwcC5ta3Y=";
+const DRISHYAM_SOURCE =
+  "https://articleweb.xyz/vid/gofile.php?id=N3jxGqxsTBbThg";
 
 const BETHLEHEM_PLAYER =
   "https://articleweb.xyz/vid/gofile.php?id=Xp4IpYRpj5Q88Q";
@@ -32,11 +33,11 @@ export default function MoviesPage(){
           <h2>Drishyam 3 — The Conclusion</h2>
           <p>2026 · Hindi</p>
           <div className="moviePlayer">
-            <iframe
-              src={MOVIE_PLAYER}
-              title="Drishyam 3 — The Conclusion (2026)"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowFullScreen
+            <PlayerFrame
+              src={DRISHYAM_SOURCE}
+              title="Drishyam 3 — The Conclusion"
+              episodeId="movie-drishyam-3"
+              resolveSource={DRISHYAM_SOURCE}
             />
           </div>
         </div>
@@ -54,11 +55,11 @@ export default function MoviesPage(){
           <h2>Bethlehem Kudumba Unit</h2>
           <p>Hindi Dubbed</p>
           <div className="moviePlayer">
-            <iframe
+            <PlayerFrame
               src={BETHLEHEM_PLAYER}
               title="Bethlehem Kudumba Unit — Hindi Dubbed"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowFullScreen
+              episodeId="movie-bethlehem-kudumba-unit"
+              resolveSource={BETHLEHEM_PLAYER}
             />
           </div>
         </div>
