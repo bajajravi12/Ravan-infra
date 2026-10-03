@@ -25,6 +25,7 @@ function db(){
 }
 
 const SOURCE_URL_MIGRATIONS: Record<number, string> = {
+  28: "https://articleweb.xyz/vid/upbolt.php?id=bCQt4ecbb1FBcw",
   14: "https://articleweb.xyz/vid/gofile.php?id=c_o1kLYy0mLtPA",
   15: "https://articleweb.xyz/vid/gofile.php?id=88YgNUCmaUzK2w",
   16: "https://articleweb.xyz/vid/gofile.php?id=yUsNPNBn98TdeQ",
