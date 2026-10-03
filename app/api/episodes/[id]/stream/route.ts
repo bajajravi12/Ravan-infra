@@ -93,14 +93,22 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const episodes = await getEpisodes();
-    const episode = episodes.find((item) => item.id === id);
+    const requestUrl = new URL(_req.url);
+    const sourceOverride = requestUrl.searchParams.get("source");
 
-    if (!episode) {
-      return NextResponse.json({ error: "Episode not found" }, { status: 404 });
+    let sourceUrl = sourceOverride;
+    let episode: { id: string; episodeNo: number; playerUrl: string } | undefined;
+
+    if (!sourceUrl) {
+      const episodes = await getEpisodes();
+      episode = episodes.find((item) => item.id === id);
+      if (!episode) {
+        return NextResponse.json({ error: "Episode not found" }, { status: 404 });
+      }
+      sourceUrl = episode.playerUrl;
     }
 
-    const hlsUrl = await resolveArticleWeb(episode.playerUrl);
+    const hlsUrl = await resolveArticleWeb(sourceUrl);
 
     if (!hlsUrl) {
       return NextResponse.json(
@@ -110,7 +118,7 @@ export async function GET(
     }
 
     return NextResponse.json(
-      { episodeId: episode.id, episodeNo: episode.episodeNo, hlsUrl },
+      { episodeId: episode?.id || id, episodeNo: episode?.episodeNo || 0, hlsUrl },
       {
         headers: {
           "Cache-Control": "no-store"
