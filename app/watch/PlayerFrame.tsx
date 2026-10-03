@@ -78,7 +78,7 @@ export default function PlayerFrame({
       <div className="playerStage">
         <div className="playerWrap" ref={frameRef}>
           {playUrl ? (
-            <HlsPlayer src={playUrl} title={title} />
+            <HlsPlayer src={playUrl} title={title} episodeId={episodeId} />
           ) : (
             <div className="playerLoading">
               {error || "Loading video…"}
