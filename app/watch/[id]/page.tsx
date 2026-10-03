@@ -2,7 +2,6 @@ import Link from "next/link";
 import {notFound} from "next/navigation";
 import {getEpisodes} from "@/lib/episodes";
 import PlayerFrame from "../PlayerFrame";
-import {AnalyticsTracker} from "@/app/AnalyticsTracker";
 
 export const dynamic="force-dynamic";
 
@@ -15,7 +14,6 @@ export default async function Watch({params}:{params:Promise<{id:string}>}){
   const next=episodes[index-1];
   const prev=episodes[index+1];
   return <section className="shell watchPage">
-    <AnalyticsTracker eventType="video_play" contentType="episode" contentId={ep.id} contentTitle={ep.title}/>
     <Link className="back" href="/bigg-boss-20">← All Episodes</Link>
     <PlayerFrame src={ep.playerUrl} title={ep.title} episodeId={ep.id} />
     <div className="watchInfo"><div><div className="eyebrow">EPISODE {ep.episodeNo}</div><h1>{ep.title}</h1><p>{ep.date}</p></div><div className="episodeNav">{prev&&<Link href={"/watch/"+prev.id}>← Previous</Link>}{next&&<Link href={"/watch/"+next.id}>Next →</Link>}</div></div>
