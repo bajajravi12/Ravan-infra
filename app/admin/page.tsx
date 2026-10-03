@@ -2,6 +2,14 @@
 import {useState} from "react";
 
 type Episode={id:string;episodeNo:number;title:string;date:string;playerUrl:string};
+type Analytics={
+  pageViews:number;
+  todayVisitors:number;
+  uniqueVisitors:number;
+  topContent:{contentId:string;contentTitle:string;clicks:number}[];
+  daily:{day:string;visitors:number;pageViews:number;contentClicks:number}[];
+  devices:{device:string;visitors:number}[];
+};
 const blank={episodeNo:"",title:"",date:"",playerUrl:""};
 
 export default function Admin(){
@@ -11,21 +19,26 @@ export default function Admin(){
   const [form,setForm]=useState(blank);
   const [editing,setEditing]=useState<string|null>(null);
   const [msg,setMsg]=useState("");
+  const [analytics,setAnalytics]=useState<Analytics|null>(null);
 
   async function load(adminKey=key){
     const r=await fetch("/api/episodes",{headers:{"x-admin-key":adminKey}});
     const d=await r.json();
     if(!r.ok){setUnlocked(false);setMsg(d.error||"Invalid admin key");return false;}
-    setEpisodes(d);setUnlocked(true);setMsg("");return true;
+    setEpisodes(d);setUnlocked(true);setMsg("");
+    loadAnalytics(adminKey);
+    return true;
   }
 
-  async function unlock(e:React.FormEvent){
-    e.preventDefault();
-    await load(key);
+  async function loadAnalytics(adminKey=key){
+    const r=await fetch("/api/analytics",{headers:{"x-admin-key":adminKey},cache:"no-store"});
+    if(r.ok) setAnalytics(await r.json());
   }
+
+  async function unlock(e:React.FormEvent){e.preventDefault();await load(key);}
 
   async function submit(e:React.FormEvent){
-    e.preventDefault(); setMsg("");
+    e.preventDefault();setMsg("");
     const url=editing?"/api/episodes/"+editing:"/api/episodes";
     const method=editing?"PUT":"POST";
     const r=await fetch(url,{method,headers:{"Content-Type":"application/json","x-admin-key":key},body:JSON.stringify({...form,episodeNo:Number(form.episodeNo)})});
@@ -62,7 +75,35 @@ export default function Admin(){
   </section>;
 
   return <section className="shell page admin">
-    <div className="sectionHead"><div><div className="eyebrow">CONTROL PANEL</div><h1>Episode Admin</h1><p>Future me naye episodes aur source links yahin se manage karo.</p></div></div>
+    <div className="sectionHead"><div><div className="eyebrow">CONTROL PANEL</div><h1>Episode Admin</h1><p>Episodes manage karo aur site analytics dekho.</p></div></div>
+
+    {analytics&&<div className="analyticsBlock">
+      <div className="analyticsStats">
+        <div className="analyticsStat"><span>Today Visitors</span><b>{analytics.todayVisitors}</b></div>
+        <div className="analyticsStat"><span>Total Page Views</span><b>{analytics.pageViews}</b></div>
+        <div className="analyticsStat"><span>Unique Visitors</span><b>{analytics.uniqueVisitors}</b></div>
+      </div>
+
+      <div className="adminGrid">
+        <div className="panel">
+          <div className="panelTitle"><h2>Top Content</h2><button className="editBtn" onClick={()=>loadAnalytics()}>↻ Refresh</button></div>
+          {analytics.topContent.length?analytics.topContent.map(x=><div className="analyticsRow" key={x.contentId}><span>{x.contentTitle}</span><b>{x.clicks}</b></div>):<div className="note">Abhi analytics events nahi aaye.</div>}
+        </div>
+        <div className="panel">
+          <h2>Device Visitors</h2>
+          {analytics.devices.length?analytics.devices.map(x=><div className="analyticsRow" key={x.device}><span>{x.device}</span><b>{x.visitors}</b></div>):<div className="note">No device data yet.</div>}
+        </div>
+      </div>
+
+      <div className="panel">
+        <h2>Last 30 Days</h2>
+        <div className="analyticsTable">
+          <div className="analyticsRow analyticsHead"><span>Date</span><b>Visitors · Views · Clicks</b></div>
+          {analytics.daily.slice().reverse().map(x=><div className="analyticsRow" key={x.day}><span>{x.day}</span><b>{x.visitors} · {x.pageViews} · {x.contentClicks}</b></div>)}
+        </div>
+      </div>
+    </div>}
+
     <div className="adminGrid">
       <form className="panel" onSubmit={submit}>
         <h2>{editing?"Edit Episode":"Add New Episode"}</h2>
@@ -83,6 +124,6 @@ export default function Admin(){
         </div>)}
       </div>
     </div>
-    <p className="note">Production me strong <code>ADMIN_KEY</code> environment variable zaroor set karna. API bhi key ke bina episode management allow nahi karegi.</p>
+    <p className="note">Analytics anonymous visitor ID par based hai; raw IP address store nahi hota. Production me strong <code>ADMIN_KEY</code> zaroor set karna.</p>
   </section>;
 }
