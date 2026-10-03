@@ -1,4 +1,5 @@
 import {AnalyticsTracker} from "@/app/AnalyticsTracker";
+import PlayerFrame from "@/app/watch/PlayerFrame";
 
 const MOVIE_PLAYER =
   "https://hbplay.pages.dev/?u=aHR0cHM6Ly9jZG4ubGVuaW4uYnV6ei9EcmlzaHlhbTMgLSBUaGUgQ29uY2x1c2lvbiAyMDI2IEJvbGx5d29vZCBIaW5kaSBNb3ZpZSBQcmVEdkQgNzIwcC5ta3Y/dG9rZW49NWJjNzlkNmQ1MThjZDdmOGViMjc0MDE1ZDUyMDNlZjA=&m=dmlkZW8veC1tYXRyb3Nr&t=RHJpc2h5YW0zIC0gVGhlIENvbmNsdXNpb24gKDIwMjYpIEJvbGx5d29vZCBIaW5kaSBNb3ZpZSBQcmVEdkQgNzIwcC5ta3Y=";
