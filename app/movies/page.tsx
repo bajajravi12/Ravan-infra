@@ -21,7 +21,12 @@ export default function MoviesPage(){
       </div>
 
       <article className="movieCard">
-        <div className="moviePoster">DRISHYAM 3</div>
+        <div className="moviePoster">
+          <img
+            src="https://serialtvmaza.net/wp-content/uploads/2026/10/Drishyam-640x330.jpg"
+            alt="Drishyam 3 — The Conclusion poster"
+          />
+        </div>
         <div className="movieCardBody">
           <div className="eyebrow">FEATURED MOVIE</div>
           <h2>Drishyam 3 — The Conclusion</h2>
@@ -38,7 +43,12 @@ export default function MoviesPage(){
       </article>
 
       <article className="movieCard">
-        <div className="moviePoster">BETHLEHEM</div>
+        <div className="moviePoster">
+          <img
+            src="https://www.showtimes.com/movies/bethlehem-kudumba-unit-198753/movie-poster/"
+            alt="Bethlehem Kudumba Unit poster"
+          />
+        </div>
         <div className="movieCardBody">
           <div className="eyebrow">HINDI DUBBED</div>
           <h2>Bethlehem Kudumba Unit</h2>
