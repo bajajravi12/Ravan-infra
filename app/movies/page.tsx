@@ -45,7 +45,7 @@ export default function MoviesPage(){
       <article className="movieCard">
         <div className="moviePoster">
           <img
-            src="https://www.showtimes.com/movies/bethlehem-kudumba-unit-198753/movie-poster/"
+            src="https://static2.showtimes.com/poster/160x236/bethlehem-kudumba-unit-291361.jpg"
             alt="Bethlehem Kudumba Unit poster"
           />
         </div>
