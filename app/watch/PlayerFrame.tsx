@@ -7,10 +7,12 @@ export default function PlayerFrame({
   src,
   title,
   episodeId,
+  resolveSource,
 }: {
   src: string;
   title: string;
   episodeId: string;
+  resolveSource?: string;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const [playUrl, setPlayUrl] = useState<string | null>(
@@ -28,7 +30,7 @@ export default function PlayerFrame({
     setPlayUrl(null);
     setError("");
 
-    fetch(`/api/episodes/${encodeURIComponent(episodeId)}/stream`, {
+    fetch(`/api/episodes/${encodeURIComponent(episodeId)}/stream${resolveSource ? `?source=${encodeURIComponent(resolveSource)}` : ""}`, {
       cache: "no-store",
     })
       .then(async (response) => {
@@ -48,7 +50,7 @@ export default function PlayerFrame({
     return () => {
       cancelled = true;
     };
-  }, [src, episodeId]);
+  }, [src, episodeId, resolveSource]);
 
   async function fullscreen() {
     const el = frameRef.current;
