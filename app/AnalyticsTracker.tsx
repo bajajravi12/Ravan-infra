@@ -1,20 +1,7 @@
 "use client";
 
 import {useEffect} from "react";
-
-function visitorId(){
-  const key="aarvi_visitor_id";
-  let id=localStorage.getItem(key);
-  if(!id){
-    id=crypto.randomUUID();
-    localStorage.setItem(key,id);
-  }
-  return id;
-}
-
-function device(){
-  return window.innerWidth<700 ? "mobile" : window.innerWidth<1100 ? "tablet" : "desktop";
-}
+import {visitorIdForAnalytics} from "./analytics-client";
 
 export function AnalyticsTracker({
   eventType="page_view",
@@ -28,23 +15,20 @@ export function AnalyticsTracker({
   contentTitle?:string;
 }){
   useEffect(()=>{
-    const send=()=>{
-      fetch("/api/analytics",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        keepalive:true,
-        body:JSON.stringify({
-          visitorId:visitorId(),
-          eventType,
-          contentType,
-          contentId,
-          contentTitle,
-          path:window.location.pathname,
-          device:device()
-        })
-      }).catch(()=>{});
-    };
-    send();
+    fetch("/api/analytics",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      keepalive:true,
+      body:JSON.stringify({
+        visitorId:visitorIdForAnalytics(),
+        eventType,
+        contentType,
+        contentId,
+        contentTitle,
+        path:window.location.pathname,
+        device:window.innerWidth<700?"mobile":window.innerWidth<1100?"tablet":"desktop"
+      })
+    }).catch(()=>{});
   },[eventType,contentType,contentId,contentTitle]);
 
   return null;
