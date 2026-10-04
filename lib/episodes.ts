@@ -61,9 +61,10 @@ export async function getEpisodes():Promise<Episode[]>{
         AND player_url NOT LIKE 'https://articleweb.xyz/%'`;
   }
 
+  await sql`DELETE FROM episodes WHERE episode_no = 28`;
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
     VALUES ('bb20-ep28', 28, 'Bigg Boss 20 — Episode 28', '2026-10-03', 'https://articleweb.xyz/vid/gofile.php?id=bCQt4ecbb1FBcw')
-    ON CONFLICT (episode_no) DO UPDATE SET
+    ON CONFLICT (id) DO UPDATE SET
       player_url = EXCLUDED.player_url,
       title = EXCLUDED.title,
       date = EXCLUDED.date`;
