@@ -14,9 +14,25 @@ const filePath=path.join(process.cwd(),"data","episodes.json");
 
 function fileEpisodes():Episode[]{
   try{
-    return JSON.parse(fs.readFileSync(filePath,"utf8")) as Episode[];
+    const episodes = JSON.parse(fs.readFileSync(filePath,"utf8")) as Episode[];
+    if (!episodes.some((ep) => ep.episodeNo === 28)) {
+      episodes.push({
+        id: "bb20-ep28",
+        episodeNo: 28,
+        title: "Bigg Boss 20 — Episode 28",
+        date: "2026-10-03",
+        playerUrl: "https://articleweb.xyz/vid/gofile.php?id=bCQt4ecbb1FBcw"
+      });
+    }
+    return episodes.sort((a,b)=>b.episodeNo-a.episodeNo);
   }catch{
-    return [];
+    return [{
+      id: "bb20-ep28",
+      episodeNo: 28,
+      title: "Bigg Boss 20 — Episode 28",
+      date: "2026-10-03",
+      playerUrl: "https://articleweb.xyz/vid/gofile.php?id=bCQt4ecbb1FBcw"
+    }];
   }
 }
 
@@ -82,13 +98,25 @@ export async function getEpisodes():Promise<Episode[]>{
     return seed.sort((a,b)=>b.episodeNo-a.episodeNo);
   }
 
-  return rows.map((r:any)=>({
+  const episodes = rows.map((r:any)=>({
     id:String(r.id),
     episodeNo:Number(r.episode_no),
     title:String(r.title),
     date:String(r.date),
     playerUrl:String(r.player_url)
   }));
+
+  if (!episodes.some((ep) => ep.episodeNo === 28)) {
+    episodes.push({
+      id: "bb20-ep28",
+      episodeNo: 28,
+      title: "Bigg Boss 20 — Episode 28",
+      date: "2026-10-03",
+      playerUrl: "https://articleweb.xyz/vid/gofile.php?id=bCQt4ecbb1FBcw"
+    });
+  }
+
+  return episodes.sort((a,b)=>b.episodeNo-a.episodeNo);
 }
 
 export async function saveEpisodes(episodes:Episode[]):Promise<void>{
