@@ -102,6 +102,15 @@ export async function GET(
     if (!sourceUrl) {
       const episodes = await getEpisodes();
       episode = episodes.find((item) => item.id === id);
+
+      if (!episode && id === "bb20-ep29") {
+        episode = {
+          id: "bb20-ep29",
+          episodeNo: 29,
+          playerUrl: "https://articleweb.xyz/vid/gofile.php?id=iAXzDcKk-GkA0A"
+        };
+      }
+
       if (!episode) {
         return NextResponse.json({ error: "Episode not found" }, { status: 404 });
       }
