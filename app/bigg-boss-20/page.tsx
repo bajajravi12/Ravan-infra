@@ -5,7 +5,18 @@ import TrackedLink from "@/app/TrackedLink";
 export const dynamic="force-dynamic";
 
 export default async function BiggBoss(){
-  const episodes=(await getEpisodes()).sort((a,b)=>b.episodeNo-a.episodeNo);
+  const dbEpisodes = await getEpisodes();
+  const episodes = [...dbEpisodes];
+  if (!episodes.some((ep) => ep.episodeNo === 29)) {
+    episodes.push({
+      id: "bb20-ep29",
+      episodeNo: 29,
+      title: "Bigg Boss 20 — Episode 29",
+      date: "2026-10-04",
+      playerUrl: "https://articleweb.xyz/vid/gofile.php?id=iAXzDcKk-GkA0A"
+    });
+  }
+  episodes.sort((a,b)=>b.episodeNo-a.episodeNo);
   return <section className="shell page">
     <AnalyticsTracker contentType="category" contentId="bigg-boss-20" contentTitle="Bigg Boss 20"/>
     <div className="sectionHead"><div><div className="eyebrow">COLORS TV</div><h1>Bigg Boss 20</h1><p>{episodes.length} episode{episodes.length!==1?"s":""} available</p></div></div>
