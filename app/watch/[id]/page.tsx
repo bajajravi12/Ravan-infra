@@ -8,7 +8,18 @@ export const dynamic="force-dynamic";
 export default async function Watch({params}:{params:Promise<{id:string}>}){
   const {id}=await params;
   const episodes=(await getEpisodes()).sort((a,b)=>b.episodeNo-a.episodeNo);
-  const ep=episodes.find(x=>x.id===id);
+  let ep=episodes.find(x=>x.id===id);
+
+  if (!ep && id === "bb20-ep29") {
+    ep = {
+      id: "bb20-ep29",
+      episodeNo: 29,
+      title: "Bigg Boss 20 — Episode 29",
+      date: "2026-10-04",
+      playerUrl: "https://articleweb.xyz/vid/gofile.php?id=iAXzDcKk-GkA0A"
+    };
+  }
+
   if(!ep) notFound();
   const index=episodes.findIndex(x=>x.id===id);
   const next=episodes[index-1];
