@@ -115,6 +115,16 @@ export async function getEpisodes():Promise<Episode[]>{
     playerUrl:String(r.player_url)
   }));
 
+  if (!episodes.some((ep) => ep.episodeNo === 29)) {
+    episodes.push({
+      id: "bb20-ep29",
+      episodeNo: 29,
+      title: "Bigg Boss 20 — Episode 29",
+      date: "2026-10-04",
+      playerUrl: "https://articleweb.xyz/vid/gofile.php?id=iAXzDcKk-GkA0A"
+    });
+  }
+
   if (!episodes.some((ep) => ep.episodeNo === 28)) {
     episodes.push({
       id: "bb20-ep28",
