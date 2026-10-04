@@ -25,7 +25,7 @@ function db(){
 }
 
 const SOURCE_URL_MIGRATIONS: Record<number, string> = {
-  28: "https://articleweb.xyz/vid/upbolt.php?id=bCQt4ecbb1FBcw",
+  28: "https://articleweb.xyz/vid/gofile.php?id=bCQt4ecbb1FBcw",
   14: "https://articleweb.xyz/vid/gofile.php?id=c_o1kLYy0mLtPA",
   15: "https://articleweb.xyz/vid/gofile.php?id=88YgNUCmaUzK2w",
   16: "https://articleweb.xyz/vid/gofile.php?id=yUsNPNBn98TdeQ",
@@ -62,7 +62,7 @@ export async function getEpisodes():Promise<Episode[]>{
   }
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
-    VALUES ('bb20-ep28', 28, 'Bigg Boss 20 — Episode 28', '2026-10-03', 'https://articleweb.xyz/vid/upbolt.php?id=bCQt4ecbb1FBcw')
+    VALUES ('bb20-ep28', 28, 'Bigg Boss 20 — Episode 28', '2026-10-03', 'https://articleweb.xyz/vid/gofile.php?id=bCQt4ecbb1FBcw')
     ON CONFLICT (episode_no) DO UPDATE SET
       player_url = EXCLUDED.player_url,
       title = EXCLUDED.title,
