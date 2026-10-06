@@ -103,6 +103,14 @@ export async function GET(
       const episodes = await getEpisodes();
       episode = episodes.find((item) => item.id === id);
 
+      if (!episode && id === "bb20-ep31") {
+        episode = {
+          id: "bb20-ep31",
+          episodeNo: 31,
+          playerUrl: "https://articleweb.xyz/vid/gofile.php?id=awIT7U3qcY13_w"
+        };
+      }
+
       if (!episode && id === "bb20-ep30") {
         episode = {
           id: "bb20-ep30",
