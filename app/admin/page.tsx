@@ -23,7 +23,7 @@ export default function Admin(){
 
   async function load(adminKey=key){
     const r=await fetch("/api/episodes",{headers:{"x-admin-key":adminKey}});
-    const d: any=await r.json();
+    const d = (await r.json()) as any;
     if(!r.ok){setUnlocked(false);setMsg(d?.error||"Invalid admin key");return false;}
     setEpisodes(d);setUnlocked(true);setMsg("");
     loadAnalytics(adminKey);
