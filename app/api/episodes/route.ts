@@ -6,6 +6,13 @@ export const dynamic="force-dynamic";
 
 function auth(req:Request){return req.headers.get("x-admin-key")===(process.env.ADMIN_KEY||"change-me")}
 
+type EpisodeCreateBody = {
+  episodeNo?: number | string;
+  title?: string;
+  date?: string;
+  playerUrl?: string;
+};
+
 export async function GET(req:Request){
   if(!auth(req)) return NextResponse.json({error:"Invalid admin key"},{status:401});
   return NextResponse.json(await getEpisodes());
@@ -13,7 +20,7 @@ export async function GET(req:Request){
 
 export async function POST(req:Request){
   if(!auth(req)) return NextResponse.json({error:"Invalid admin key"},{status:401});
-  const body=await req.json();
+  const body=(await req.json()) as EpisodeCreateBody;
   if(!body.episodeNo||!body.title||!body.date||!body.playerUrl) return NextResponse.json({error:"All fields are required"},{status:400});
   const episodes=await getEpisodes();
   const id="bb20-"+Date.now();
