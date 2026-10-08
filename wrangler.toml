@@ -8,4 +8,4 @@ compatibility_date = "2026-10-08"
 [[d1_databases]]
 binding = "DB"
 database_name = "ravan-infra-episodes"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "5aae01fb-cad6-4c64-a22a-532ee32d500e"
