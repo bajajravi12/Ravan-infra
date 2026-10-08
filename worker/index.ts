@@ -136,38 +136,63 @@ async function watch(env: Env, id: string) {
   const ep = await env.DB.prepare(
     "SELECT id, episode_no, title, date, player_url FROM episodes WHERE id=?"
   ).bind(id).first<Episode>();
-  if (!ep) return new Response("Episode not found", {status:404});
-  const safeTitle = escapeHtml(ep.title);
+  if (!ep) return new Response("Episode not found", { status: 404 });
+
   const safeId = encodeURIComponent(ep.id);
-  return page(safeTitle, `<div class="top"><a class="back" href="/">← Episodes</a><div class="ep">EP ${ep.episode_no}</div></div>
-  <h1>${safeTitle}</h1><div class="muted">${escapeHtml(ep.date)}</div><br>
-  <div class="player"><video id="v" controls playsinline></video></div>
-  <p id="status" class="muted">Resolving HLS…</p>`,
-  `<script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js"></script>
-  <script>
-  (async()=>{const s=document.getElementById("status"),v=document.getElementById("v");
-  try{const r=await fetch("/api/stream/${safeId}");const d=await r.json();if(!r.ok)throw Error(d.error||"Stream error");
-  if(window.Hls&&Hls.isSupported()){const h=new Hls();h.loadSource(d.hlsUrl);h.attachMedia(v);h.on(Hls.Events.MANIFEST_PARSED,()=>s.textContent="Ready");}
-  else if(v.canPlayType("application/vnd.apple.mpegurl")){v.src=d.hlsUrl;s.textContent="Ready";}
-  else throw Error("HLS is not supported in this browser");
-  }catch(e){s.textContent=e.message||"Unable to play";}})();
-  </script>`);
+  const script = `(async()=>{const s=document.getElementById("status"),v=document.getElementById("v");
+  try{
+    const r=await fetch("/api/stream/${safeId}");const d=await r.json();
+    if(!r.ok)throw Error(d.error||"Stream error");
+    if(v.canPlayType("application/vnd.apple.mpegurl")){v.src=d.hlsUrl;s.textContent="Ready";return;}
+    const tag=document.createElement("script");
+    tag.src="https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js";
+    tag.onload=()=>{if(!window.Hls||!Hls.isSupported()){s.textContent="HLS is not supported";return;}
+      const h=new Hls();h.loadSource(d.hlsUrl);h.attachMedia(v);
+      h.on(Hls.Events.MANIFEST_PARSED,()=>s.textContent="Ready");};
+    tag.onerror=()=>{s.textContent="HLS player library failed to load"};
+    document.head.appendChild(tag);
+  }catch(e){s.textContent=e.message||"Unable to play";}
+  })();`;
+  return page(ep.title,
+    '<div class="top"><a class="back" href="/">← Episodes</a><div class="ep">EP '+ep.episode_no+'</div></div>' +
+    '<h1>'+escapeHtml(ep.title)+'</h1><div class="muted">'+escapeHtml(ep.date)+'</div><br>' +
+    '<div class="player"><video id="v" controls playsinline></video></div><p id="status" class="muted">Resolving HLS…</p>',
+    script);
 }
 
 async function admin(env: Env) {
-  return page("Admin", `<div class="top"><div><div class="muted">RAVAN INFRA</div><h1>Episode Admin</h1></div><a class="back" href="/">Home</a></div>
-  <form id="f"><label>Admin Key</label><input id="key" type="password" required>
-  <label>Episode No</label><input id="no" type="number" required>
-  <label>Title</label><input id="title" value="Bigg Boss 20 — Episode " required>
-  <label>Date</label><input id="date" type="date" required>
-  <label>Source URL</label><input id="url" type="url" placeholder="https://articleweb.xyz/vid/gofile.php?id=..." required>
-  <button class="btn">Save Episode</button></form><div id="list" class="grid"></div>`,
-  `const k=document.getElementById("key");k.value=localStorage.getItem("adminKey")||"";
-  async function load(){const r=await fetch("/api/episodes");const d=await r.json();document.getElementById("list").innerHTML=(d.results||[]).map(e=>`<div class="card"><div class="ep">EP ${e.episode_no}</div><b>${e.title}</b><div class="muted small">${e.date}</div><br><button class="danger" onclick="del('${e.id}')">Delete</button></div>`).join("")}
-  document.getElementById("f").onsubmit=async(e)=>{e.preventDefault();localStorage.setItem("adminKey",k.value);const r=await fetch("/api/episodes",{method:"POST",headers:{"content-type":"application/json","x-admin-key":k.value},body:JSON.stringify({episodeNo:+no.value,title:title.value,date:date.value,playerUrl:url.value})});const d=await r.json();if(!r.ok)return alert(d.error);alert("Saved");load()};
-  async function del(id){if(!confirm("Delete episode?"))return;const r=await fetch("/api/episodes/"+id,{method:"DELETE",headers:{"x-admin-key":k.value}});const d=await r.json();if(!r.ok)return alert(d.error);load()}load();
-  `); 
+  const script = `const k=document.getElementById("key");k.value=localStorage.getItem("adminKey")||"";
+  async function load(){
+    const r=await fetch("/api/episodes");const d=await r.json();
+    document.getElementById("list").innerHTML=(d.results||[]).map(e =>
+      '<div class="card"><div class="ep">EP '+e.episode_no+'</div><b>'+e.title+
+      '</b><div class="muted small">'+e.date+
+      '</div><br><button class="danger" onclick="del(\\''+e.id+'\\')">Delete</button></div>'
+    ).join("");
+  }
+  document.getElementById("f").onsubmit=async(e)=>{
+    e.preventDefault();localStorage.setItem("adminKey",k.value);
+    const r=await fetch("/api/episodes",{method:"POST",headers:{"content-type":"application/json","x-admin-key":k.value},
+      body:JSON.stringify({episodeNo:+no.value,title:title.value,date:date.value,playerUrl:url.value})});
+    const d=await r.json();if(!r.ok)return alert(d.error);alert("Saved");load();
+  };
+  async function del(id){
+    if(!confirm("Delete episode?"))return;
+    const r=await fetch("/api/episodes/"+encodeURIComponent(id),{method:"DELETE",headers:{"x-admin-key":k.value}});
+    const d=await r.json();if(!r.ok)return alert(d.error);load();
+  }
+  load();`;
+  return page("Admin",
+    '<div class="top"><div><div class="muted">RAVAN INFRA</div><h1>Episode Admin</h1></div><a class="back" href="/">Home</a></div>' +
+    '<form id="f"><label>Admin Key</label><input id="key" type="password" required>' +
+    '<label>Episode No</label><input id="no" type="number" required>' +
+    '<label>Title</label><input id="title" value="Bigg Boss 20 — Episode " required>' +
+    '<label>Date</label><input id="date" type="date" required>' +
+    '<label>Source URL</label><input id="url" type="url" placeholder="https://articleweb.xyz/vid/gofile.php?id=..." required>' +
+    '<button class="btn">Save Episode</button></form><div id="list" class="grid"></div>',
+    script);
 }
+
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
