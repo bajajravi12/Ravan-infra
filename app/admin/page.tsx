@@ -32,7 +32,7 @@ export default function Admin(){
 
   async function loadAnalytics(adminKey=key){
     const r=await fetch("/api/analytics",{headers:{"x-admin-key":adminKey},cache:"no-store"});
-    if(r.ok) setAnalytics(await r.json());
+    if(r.ok) setAnalytics(await r.json() as Analytics);
   }
 
   async function unlock(e:React.FormEvent){e.preventDefault();await load(key);}
@@ -42,7 +42,7 @@ export default function Admin(){
     const url=editing?"/api/episodes/"+editing:"/api/episodes";
     const method=editing?"PUT":"POST";
     const r=await fetch(url,{method,headers:{"Content-Type":"application/json","x-admin-key":key},body:JSON.stringify({...form,episodeNo:Number(form.episodeNo)})});
-    const d=await r.json();
+    const d: any=await r.json();
     if(!r.ok){setMsg(d.error||"Failed");return}
     setForm(blank);setEditing(null);setMsg(editing?"Episode updated ✓":"Episode added ✓");load();
   }
@@ -56,7 +56,7 @@ export default function Admin(){
   async function remove(id:string){
     if(!confirm("Delete this episode?"))return;
     const r=await fetch("/api/episodes/"+id,{method:"DELETE",headers:{"x-admin-key":key}});
-    const d=await r.json();
+    const d: any=await r.json();
     setMsg(d.error||"Deleted ✓");
     if(r.ok)load();
   }
