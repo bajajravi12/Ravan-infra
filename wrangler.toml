@@ -1,0 +1,11 @@
+name = "ravan-infra"
+main = "worker/index.ts"
+compatibility_date = "2026-10-08"
+
+[vars]
+# Set ADMIN_KEY securely with: wrangler secret put ADMIN_KEY
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ravan-infra-episodes"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
