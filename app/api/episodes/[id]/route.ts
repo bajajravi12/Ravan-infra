@@ -6,10 +6,17 @@ export const dynamic="force-dynamic";
 
 function auth(req:Request){return req.headers.get("x-admin-key")===(process.env.ADMIN_KEY||"change-me")}
 
+type EpisodeUpdateBody = {
+  episodeNo?: number | string;
+  title?: string;
+  date?: string;
+  playerUrl?: string;
+};
+
 export async function PUT(req:Request,{params}:{params:Promise<{id:string}>}){
   if(!auth(req)) return NextResponse.json({error:"Invalid admin key"},{status:401});
   const {id}=await params;
-  const body=await req.json();
+  const body=(await req.json()) as EpisodeUpdateBody;
   const episodes=await getEpisodes();
   const index=episodes.findIndex(x=>x.id===id);
   if(index<0) return NextResponse.json({error:"Episode not found"},{status:404});
