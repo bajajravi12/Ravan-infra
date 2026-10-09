@@ -42,6 +42,7 @@ function db(){
 
 const SOURCE_URL_MIGRATIONS: Record<number, string> = {
   33: "https://articleweb.xyz/vid/gofile.php?id=Ni4VUaMQbP97ww",
+  33: "https://articleweb.xyz/vid/gofile.php?id=Ni4VUaMQbP97ww",
   32: "https://articleweb.xyz/vid/gofile.php?id=vorh1TQ1qAvmEg",
   31: "https://articleweb.xyz/vid/gofile.php?id=awIT7U3qcY13_w",
   30: "https://articleweb.xyz/vid/gofile.php?id=FPpOkRJdo1sToA",
