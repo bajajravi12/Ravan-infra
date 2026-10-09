@@ -27,6 +27,7 @@ INSERT INTO episodes (id, episode_no, title, date, player_url) VALUES
 ('bb20-ep29',29,'Bigg Boss 20 — Episode 29','2026-10-04','https://articleweb.xyz/vid/gofile.php?id=iAXzDcKk-GkA0A'),
 ('bb20-ep30',30,'Bigg Boss 20 — Episode 30','2026-10-05','https://articleweb.xyz/vid/gofile.php?id=FPpOkRJdo1sToA'),
 ('bb20-ep31',31,'Bigg Boss 20 — Episode 31','2026-10-06','https://articleweb.xyz/vid/gofile.php?id=awIT7U3qcY13_w'),
+('bb20-ep33',33,'Bigg Boss 20 — Episode 33','2026-10-08','https://articleweb.xyz/vid/gofile.php?id=Ni4VUaMQbP97ww'),
 ('bb20-ep32',32,'Bigg Boss 20 — Episode 32','2026-10-07','https://articleweb.xyz/vid/gofile.php?id=vorh1TQ1qAvmEg'),
 ('bb20-ep1',1,'Bigg Boss 20 — 26 September 2026','2026-09-26','https://articleweb.xyz/vid/gofile.php?id=sOj7YGRytgHjqQ')
 ON CONFLICT(id) DO UPDATE SET
