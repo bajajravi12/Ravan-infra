@@ -8,9 +8,11 @@ export const dynamic="force-dynamic";
 export default async function Watch({params}:{params:Promise<{id:string}>}){
   const {id}=await params;
   const episodes=(await getEpisodes()).sort((a,b)=>b.episodeNo-a.episodeNo);
-  let ep=episodes.find(x=>x.id===id);
+  const requestedEpisodeNo = Number(id.match(/(?:ep)?(\d+)$/i)?.[1]);
+  let ep=episodes.find(x=>x.id===id)
+    ?? (Number.isFinite(requestedEpisodeNo) ? episodes.find(x=>x.episodeNo===requestedEpisodeNo) : undefined);
 
-  if (!ep && id === "bb20-ep33") {
+  if (!ep && requestedEpisodeNo === 33) {
     ep = {
       id: "bb20-ep33",
       episodeNo: 33,
@@ -61,7 +63,7 @@ export default async function Watch({params}:{params:Promise<{id:string}>}){
   }
 
   if(!ep) notFound();
-  const index=episodes.findIndex(x=>x.id===id);
+  const index=episodes.findIndex(x=>x.id===ep!.id);
   const next=episodes[index-1];
   const prev=episodes[index+1];
   return <section className="shell watchPage">
