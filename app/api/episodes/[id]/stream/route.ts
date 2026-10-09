@@ -101,9 +101,11 @@ export async function GET(
 
     if (!sourceUrl) {
       const episodes = await getEpisodes();
-      episode = episodes.find((item) => item.id === id);
+      const requestedEpisodeNo = Number(id.match(/(?:ep)?(\d+)$/i)?.[1]);
+      episode = episodes.find((item) => item.id === id)
+        ?? (Number.isFinite(requestedEpisodeNo) ? episodes.find((item) => item.episodeNo === requestedEpisodeNo) : undefined);
 
-      if (!episode && id === "bb20-ep33") {
+      if (!episode && requestedEpisodeNo === 33) {
         episode = {
           id: "bb20-ep33",
           episodeNo: 33,
