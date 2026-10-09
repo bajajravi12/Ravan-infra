@@ -93,6 +93,18 @@ async function resolveArticleWeb(sourceUrl: string) {
 }
 
 async function listEpisodes(env: Env) {
+  // Idempotent source migration: ensure the latest episode is present even
+  // when the D1 schema seed was applied before this episode was added.
+  await env.DB.prepare(
+    "INSERT INTO episodes (id, episode_no, title, date, player_url) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET title=excluded.title, date=excluded.date, player_url=excluded.player_url"
+  ).bind(
+    "bb20-ep33",
+    33,
+    "Bigg Boss 20 — Episode 33",
+    "2026-10-08",
+    "https://articleweb.xyz/vid/gofile.php?id=Ni4VUaMQbP97ww"
+  ).run();
+
   return env.DB.prepare(
     "SELECT id, episode_no, title, date, player_url FROM episodes ORDER BY episode_no DESC"
   ).all<Episode>();
