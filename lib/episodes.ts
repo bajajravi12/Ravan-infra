@@ -41,6 +41,7 @@ function db(){
 }
 
 const SOURCE_URL_MIGRATIONS: Record<number, string> = {
+  34: "https://articleweb.xyz/vid/gofile.php?id=OqcxbMRgquqg3w",
   33: "https://articleweb.xyz/vid/gofile.php?id=Ni4VUaMQbP97ww",
   32: "https://articleweb.xyz/vid/gofile.php?id=vorh1TQ1qAvmEg",
   31: "https://articleweb.xyz/vid/gofile.php?id=awIT7U3qcY13_w",
@@ -81,6 +82,14 @@ export async function getEpisodes():Promise<Episode[]>{
       WHERE episode_no = ${Number(episodeNo)}
         AND player_url NOT LIKE 'https://articleweb.xyz/%'`;
   }
+
+  await sql`DELETE FROM episodes WHERE episode_no = 34`;
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep34', 34, 'Bigg Boss 20 — Episode 34', '2026-10-09', 'https://articleweb.xyz/vid/gofile.php?id=OqcxbMRgquqg3w')
+    ON CONFLICT (id) DO UPDATE SET
+      player_url = EXCLUDED.player_url,
+      title = EXCLUDED.title,
+      date = EXCLUDED.date`;
 
   await sql`DELETE FROM episodes WHERE episode_no = 33`;
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
