@@ -105,6 +105,16 @@ async function listEpisodes(env: Env) {
     "https://articleweb.xyz/vid/gofile.php?id=Ni4VUaMQbP97ww"
   ).run();
 
+  await env.DB.prepare(
+    "INSERT INTO episodes (id, episode_no, title, date, player_url) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET title=excluded.title, date=excluded.date, player_url=excluded.player_url"
+  ).bind(
+    "bb20-ep34",
+    34,
+    "Bigg Boss 20 — Episode 34",
+    "2026-10-09",
+    "https://articleweb.xyz/vid/gofile.php?id=OqcxbMRgquqg3w"
+  ).run();
+
   return env.DB.prepare(
     "SELECT id, episode_no, title, date, player_url FROM episodes ORDER BY episode_no DESC"
   ).all<Episode>();
