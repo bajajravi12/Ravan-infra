@@ -12,6 +12,16 @@ export default async function Watch({params}:{params:Promise<{id:string}>}){
   let ep=episodes.find(x=>x.id===id)
     ?? (Number.isFinite(requestedEpisodeNo) ? episodes.find(x=>x.episodeNo===requestedEpisodeNo) : undefined);
 
+  if (!ep && requestedEpisodeNo === 34) {
+    ep = {
+      id: "bb20-ep34",
+      episodeNo: 34,
+      title: "Bigg Boss 20 — Episode 34",
+      date: "2026-10-09",
+      playerUrl: "https://articleweb.xyz/vid/gofile.php?id=OqcxbMRgquqg3w"
+    };
+  }
+
   if (!ep && requestedEpisodeNo === 33) {
     ep = {
       id: "bb20-ep33",
