@@ -105,6 +105,14 @@ export async function GET(
       episode = episodes.find((item) => item.id === id)
         ?? (Number.isFinite(requestedEpisodeNo) ? episodes.find((item) => item.episodeNo === requestedEpisodeNo) : undefined);
 
+      if (!episode && requestedEpisodeNo === 34) {
+        episode = {
+          id: "bb20-ep34",
+          episodeNo: 34,
+          playerUrl: "https://articleweb.xyz/vid/gofile.php?id=OqcxbMRgquqg3w"
+        };
+      }
+
       if (!episode && requestedEpisodeNo === 33) {
         episode = {
           id: "bb20-ep33",
