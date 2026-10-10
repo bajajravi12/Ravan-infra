@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS episodes (
 CREATE INDEX IF NOT EXISTS idx_episodes_episode_no ON episodes(episode_no);
 
 INSERT INTO episodes (id, episode_no, title, date, player_url) VALUES
+('bb20-ep34',34,'Bigg Boss 20 — Episode 34','2026-10-09','https://articleweb.xyz/vid/gofile.php?id=OqcxbMRgquqg3w'),
 ('bb20-ep14',14,'Bigg Boss 20 — Episode 14','2026-09-29','https://articleweb.xyz/vid/gofile.php?id=c_o1kLYy0mLtPA'),
 ('bb20-ep15',15,'Bigg Boss 20 — Episode 15','2026-09-29','https://articleweb.xyz/vid/gofile.php?id=88YgNUCmaUzK2w'),
 ('bb20-ep16',16,'Bigg Boss 20 — Episode 16','2026-09-29','https://articleweb.xyz/vid/gofile.php?id=yUsNPNBn98TdeQ'),
