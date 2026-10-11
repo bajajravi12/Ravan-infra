@@ -36,6 +36,12 @@ function fileEpisodes():Episode[]{
     return episodes.sort((a,b)=>b.episodeNo-a.episodeNo);
   }catch{
     return [{
+      id: "bb20-ep35",
+      episodeNo: 35,
+      title: "Bigg Boss 20 — Episode 35",
+      date: "2026-10-10",
+      playerUrl: "https://articleweb.xyz/vid/gofile.php?id=3yHxxwi32dLZBQ"
+    }, {
       id: "bb20-ep28",
       episodeNo: 28,
       title: "Bigg Boss 20 — Episode 28",
