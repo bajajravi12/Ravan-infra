@@ -30,7 +30,7 @@ function fileEpisodes():Episode[]{
         episodeNo: 35,
         title: "Bigg Boss 20 — Episode 35",
         date: "2026-10-10",
-        playerUrl: "https://articleweb.xyz/vid/gofile.php?id=3yHxxwi32dLZBQ"
+        playerUrl: "https://articleweb.xyz/vid/mobile.php?id=3yHxxwi32dLZBQ"
       });
     }
     return episodes.sort((a,b)=>b.episodeNo-a.episodeNo);
@@ -40,7 +40,7 @@ function fileEpisodes():Episode[]{
       episodeNo: 35,
       title: "Bigg Boss 20 — Episode 35",
       date: "2026-10-10",
-      playerUrl: "https://articleweb.xyz/vid/gofile.php?id=3yHxxwi32dLZBQ"
+      playerUrl: "https://articleweb.xyz/vid/mobile.php?id=3yHxxwi32dLZBQ"
     }, {
       id: "bb20-ep28",
       episodeNo: 28,
@@ -56,7 +56,7 @@ function db(){
 }
 
 const SOURCE_URL_MIGRATIONS: Record<number, string> = {
-  35: "https://articleweb.xyz/vid/gofile.php?id=3yHxxwi32dLZBQ",
+  35: "https://articleweb.xyz/vid/mobile.php?id=3yHxxwi32dLZBQ",
   34: "https://articleweb.xyz/vid/gofile.php?id=OqcxbMRgquqg3w",
   33: "https://articleweb.xyz/vid/gofile.php?id=Ni4VUaMQbP97ww",
   32: "https://articleweb.xyz/vid/gofile.php?id=vorh1TQ1qAvmEg",
@@ -101,7 +101,7 @@ export async function getEpisodes():Promise<Episode[]>{
 
   await sql`DELETE FROM episodes WHERE episode_no = 35`;
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
-    VALUES ('bb20-ep35', 35, 'Bigg Boss 20 — Episode 35', '2026-10-10', 'https://articleweb.xyz/vid/gofile.php?id=3yHxxwi32dLZBQ')
+    VALUES ('bb20-ep35', 35, 'Bigg Boss 20 — Episode 35', '2026-10-10', 'https://articleweb.xyz/vid/mobile.php?id=3yHxxwi32dLZBQ')
     ON CONFLICT (id) DO UPDATE SET
       player_url = EXCLUDED.player_url,
       title = EXCLUDED.title,
