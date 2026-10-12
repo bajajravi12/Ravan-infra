@@ -7,6 +7,15 @@ export const dynamic="force-dynamic";
 export default async function BiggBoss(){
   const dbEpisodes = await getEpisodes();
   const episodes = [...dbEpisodes];
+  if (!episodes.some((ep) => ep.episodeNo === 36)) {
+    episodes.push({
+      id: "bb20-ep36",
+      episodeNo: 36,
+      title: "Bigg Boss 20 — Episode 36",
+      date: "2026-10-11",
+      playerUrl: "https://dramavideo.se/watch?v=77082"
+    });
+  }
   if (!episodes.some((ep) => ep.episodeNo === 34)) {
     episodes.push({
       id: "bb20-ep34",
