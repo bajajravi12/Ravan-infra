@@ -15,12 +15,21 @@ export default function PlayerFrame({
   resolveSource?: string;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
+  const isDramaVideo = (() => {
+    try { const u = new URL(src); return u.hostname === "dramavideo.se" || u.hostname.endsWith(".dramavideo.se"); }
+    catch { return false; }
+  })();
   const [playUrl, setPlayUrl] = useState<string | null>(
     /\.m3u8(?:$|\?)/i.test(src) ? src : null
   );
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (isDramaVideo) {
+      setPlayUrl(null);
+      setError("");
+      return;
+    }
     if (/\.m3u8(?:$|\?)/i.test(src)) {
       setPlayUrl(src);
       return;
@@ -50,7 +59,7 @@ export default function PlayerFrame({
     return () => {
       cancelled = true;
     };
-  }, [src, episodeId, resolveSource]);
+  }, [src, episodeId, resolveSource, isDramaVideo]);
 
   async function fullscreen() {
     const el = frameRef.current;
@@ -79,7 +88,16 @@ export default function PlayerFrame({
 
       <div className="playerStage">
         <div className="playerWrap" ref={frameRef}>
-          {playUrl ? (
+          {isDramaVideo ? (
+            <iframe
+              src={src}
+              title={title}
+              style={{ width: "100%", height: "100%", border: 0 }}
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          ) : playUrl ? (
             <HlsPlayer src={playUrl} title={title} episodeId={episodeId} />
           ) : (
             <div className="playerLoading">
