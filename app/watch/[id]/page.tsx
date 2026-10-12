@@ -18,8 +18,12 @@ export default async function Watch({params}:{params:Promise<{id:string}>}){
       episodeNo: 36,
       title: "Bigg Boss 20 — Episode 36",
       date: "2026-10-11",
-      playerUrl: "https://dramavideo.se/watch?v=77082"
+      playerUrl: "https://biggboss20.live/video-player/y6oev8-gwLQ2mNvkSJUY5nyK8ZN5W_HNgv_MYLKFjjtk5bZ5U_F3sywK_e4RKjaO_4raW6D32yOkhgWox1vZu0cvG2252j5kOLnqadu0B0B7ksicX2mkWU2bms5YUpKxES6Q79YZh1L6KhgcA8EA65LdHMPZT4yjkYp1HaUsH_QIJJ88LVU"
     };
+  }
+
+  if (!ep && requestedEpisodeNo === 35) {
+    ep = { id: "bb20-ep35", episodeNo: 35, title: "Bigg Boss 20 — Episode 35", date: "2026-10-10", playerUrl: "https://biggboss20.live/video-player/N6MGtnn213YXuiyMEAfUbX_MzsP6TbM5ffwcE-zJaKB-3taP5G_JopdWMVK7By9evGQUPCFOSLiOJ_3lvcCDe0E3OlcCgba8a8qmfZv7jQgAaaUay1mT3bxDfQNHLVEi2WTMUTCncpsuq_YZ_zDA1UI112TohtRuuZ8kNFcLOkkoK2JatOI" };
   }
 
   if (!ep && requestedEpisodeNo === 34) {
