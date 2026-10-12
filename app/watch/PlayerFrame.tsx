@@ -15,6 +15,7 @@ export default function PlayerFrame({
   resolveSource?: string;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
+  const isHostedPlayer = (() => { try { const u = new URL(src); return (u.hostname === "dramavideo.se" || u.hostname.endsWith(".dramavideo.se") || (u.hostname === "biggboss20.live" && u.pathname.startsWith("/video-player/"))); } catch { return false; } })();
   const isDramaVideo = (() => {
     try { const u = new URL(src); return u.hostname === "dramavideo.se" || u.hostname.endsWith(".dramavideo.se"); }
     catch { return false; }
@@ -25,7 +26,7 @@ export default function PlayerFrame({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (isDramaVideo) {
+    if (isHostedPlayer) {
       setPlayUrl(null);
       setError("");
       return;
@@ -59,7 +60,7 @@ export default function PlayerFrame({
     return () => {
       cancelled = true;
     };
-  }, [src, episodeId, resolveSource, isDramaVideo]);
+  }, [src, episodeId, resolveSource, isHostedPlayer]);
 
   async function fullscreen() {
     const el = frameRef.current;
@@ -88,7 +89,7 @@ export default function PlayerFrame({
 
       <div className="playerStage">
         <div className="playerWrap" ref={frameRef}>
-          {isDramaVideo ? (
+          {isHostedPlayer ? (
             <iframe
               src={src}
               title={title}
