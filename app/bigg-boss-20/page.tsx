@@ -7,6 +7,9 @@ export const dynamic="force-dynamic";
 export default async function BiggBoss(){
   const dbEpisodes = await getEpisodes();
   const episodes = [...dbEpisodes];
+  if (!episodes.some((ep) => ep.episodeNo === 38)) {
+    episodes.push({ id: "bb20-ep38", episodeNo: 38, title: "Bigg Boss 20 — Episode 38", date: "2026-10-13", playerUrl: "https://biggboss20.live/video-player/9TmVyffc3q_YoHKtvEgjKgNahExtyiPJ-CAg7d0feluMGFek_ckiYghCy7ZL_vpZ6LmKii144ka7ILSE_aeY51E-g1L0EnO1boZ3Ld966za0-KsCPaTiHK9MEAjL-ZQxKjOAiCYojPfH-smNkmvp_sK_6xOOYk-ue9YyoHSInS5t4fCe0vY" });
+  }
   if (!episodes.some((ep) => ep.episodeNo === 37)) {
     episodes.push({ id: "bb20-ep37", episodeNo: 37, title: "Bigg Boss 20 — Episode 37", date: "2026-10-12", playerUrl: "https://biggboss20.live/video-player/8xGQCf6-O9bg0E_bCcT0mrkuf5vHVu_4C6hzLF5gEKluz96uZcuTNu4-tn4q29FC9c0cH6PgoihvhB1jwdUrWj2MnniJjJNg7_TT-JX_Uq8xmbNJSGd4zW5pMOah4CRhMeAXnQHaer1PyE9lb8K1FrwcrAZU5VtF72X0rPIPImn0FB3VgvM" });
   }
