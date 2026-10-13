@@ -15,7 +15,7 @@ export default function PlayerFrame({
   resolveSource?: string;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
-  const isHostedPlayer = (() => { try { const u = new URL(src); return (u.hostname === "dramavideo.se" || u.hostname.endsWith(".dramavideo.se") || (u.hostname === "biggboss20.live" && u.pathname.startsWith("/video-player/"))); } catch { return false; } })();
+  const isHostedPlayer = (() => { try { const u = new URL(src); return (u.hostname === "dramavideo.se" || u.hostname.endsWith(".dramavideo.se") || (u.hostname === "biggboss20.live" && u.pathname.startsWith("/video-player/")) || (u.hostname === "articleweb.xyz" && u.pathname.startsWith("/vid/video.php"))); } catch { return false; } })();
   const [playUrl, setPlayUrl] = useState<string | null>(
     /\.m3u8(?:$|\?)/i.test(src) ? src : null
   );
