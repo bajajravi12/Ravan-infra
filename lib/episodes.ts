@@ -56,7 +56,7 @@ function db(){
 }
 
 const SOURCE_URL_MIGRATIONS: Record<number, string> = {
-  37: "https://articleweb.xyz/vid/video.php?id=S1VjlmzzPehp1",
+  37: "https://biggboss20.live/video-player/8xGQCf6-O9bg0E_bCcT0mrkuf5vHVu_4C6hzLF5gEKluz96uZcuTNu4-tn4q29FC9c0cH6PgoihvhB1jwdUrWj2MnniJjJNg7_TT-JX_Uq8xmbNJSGd4zW5pMOah4CRhMeAXnQHaer1PyE9lb8K1FrwcrAZU5VtF72X0rPIPImn0FB3VgvM",
   36: "https://biggboss20.live/video-player/y6oev8-gwLQ2mNvkSJUY5nyK8ZN5W_HNgv_MYLKFjjtk5bZ5U_F3sywK_e4RKjaO_4raW6D32yOkhgWox1vZu0cvG2252j5kOLnqadu0B0B7ksicX2mkWU2bms5YUpKxES6Q79YZh1L6KhgcA8EA65LdHMPZT4yjkYp1HaUsH_QIJJ88LVU",
   35: "https://biggboss20.live/video-player/N6MGtnn213YXuiyMEAfUbX_MzsP6TbM5ffwcE-zJaKB-3taP5G_JopdWMVK7By9evGQUPCFOSLiOJ_3lvcCDe0E3OlcCgba8a8qmfZv7jQgAaaUay1mT3bxDfQNHLVEi2WTMUTCncpsuq_YZ_zDA1UI112TohtRuuZ8kNFcLOkkoK2JatOI",
   34: "https://articleweb.xyz/vid/gofile.php?id=OqcxbMRgquqg3w",
@@ -103,7 +103,7 @@ export async function getEpisodes():Promise<Episode[]>{
 
   await sql`DELETE FROM episodes WHERE episode_no = 37`;
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
-    VALUES ('bb20-ep37', 37, 'Bigg Boss 20 — Episode 37', '2026-10-12', 'https://articleweb.xyz/vid/video.php?id=S1VjlmzzPehp1')
+    VALUES ('bb20-ep37', 37, 'Bigg Boss 20 — Episode 37', '2026-10-12', 'https://biggboss20.live/video-player/8xGQCf6-O9bg0E_bCcT0mrkuf5vHVu_4C6hzLF5gEKluz96uZcuTNu4-tn4q29FC9c0cH6PgoihvhB1jwdUrWj2MnniJjJNg7_TT-JX_Uq8xmbNJSGd4zW5pMOah4CRhMeAXnQHaer1PyE9lb8K1FrwcrAZU5VtF72X0rPIPImn0FB3VgvM')
     ON CONFLICT (id) DO UPDATE SET
       player_url = EXCLUDED.player_url,
       title = EXCLUDED.title,
