@@ -17,7 +17,7 @@ export default async function Watch({params}:{params:Promise<{id:string}>}){
   }
 
   if (!ep && requestedEpisodeNo === 38) {
-    ep = { id: "bb20-ep38", episodeNo: 38, title: "Bigg Boss 20 — Episode 38", date: "2026-10-13", playerUrl: "https://biggboss20.live/video-player/9TmVyffc3q_YoHKtvEgjKgNahExtyiPJ-CAg7d0feluMGFek_ckiYghCy7ZL_vpZ6LmKii144ka7ILSE_aeY51E-g1L0EnO1boZ3Ld966za0-KsCPaTiHK9MEAjL-ZQxKjOAiCYojPfH-smNkmvp_sK_6xOOYk-ue9YyoHSInS5t4fCe0vY" };
+    ep = { id: "bb20-ep38", episodeNo: 38, title: "Bigg Boss 20 — Episode 38", date: "2026-10-13", playerUrl: "https://biggboss20.live/video-player/VJ18YobVTvx6Xp7arvkkjb1LeiPziDI7vZY2ZcenwHvjYGB6tizkq4J7Pe5S_UsPS3uKqbsbRTx1iudixVQ7hiC6H-fn7xxSBiAJl-P-PxS_b1EMs5X1yudp0R9o30S-gVreOMdYhv8MfLEa7m2hk4gZvgA8-e6Dpm78FgDAETCuEgbBvbw" };
   }
 
   if (!ep && requestedEpisodeNo === 37) {
