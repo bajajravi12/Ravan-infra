@@ -39,7 +39,7 @@ function fileEpisodes():Episode[]{
         episodeNo: 38,
         title: "Bigg Boss 20 — Episode 38",
         date: "2026-10-13",
-        playerUrl: "https://biggboss20.live/video-player/9TmVyffc3q_YoHKtvEgjKgNahExtyiPJ-CAg7d0feluMGFek_ckiYghCy7ZL_vpZ6LmKii144ka7ILSE_aeY51E-g1L0EnO1boZ3Ld966za0-KsCPaTiHK9MEAjL-ZQxKjOAiCYojPfH-smNkmvp_sK_6xOOYk-ue9YyoHSInS5t4fCe0vY"
+        playerUrl: "https://biggboss20.live/video-player/VJ18YobVTvx6Xp7arvkkjb1LeiPziDI7vZY2ZcenwHvjYGB6tizkq4J7Pe5S_UsPS3uKqbsbRTx1iudixVQ7hiC6H-fn7xxSBiAJl-P-PxS_b1EMs5X1yudp0R9o30S-gVreOMdYhv8MfLEa7m2hk4gZvgA8-e6Dpm78FgDAETCuEgbBvbw"
       });
     }
     if (!episodes.some((ep) => ep.episodeNo === 35)) {
@@ -64,7 +64,7 @@ function fileEpisodes():Episode[]{
       episodeNo: 38,
       title: "Bigg Boss 20 — Episode 38",
       date: "2026-10-13",
-      playerUrl: "https://biggboss20.live/video-player/9TmVyffc3q_YoHKtvEgjKgNahExtyiPJ-CAg7d0feluMGFek_ckiYghCy7ZL_vpZ6LmKii144ka7ILSE_aeY51E-g1L0EnO1boZ3Ld966za0-KsCPaTiHK9MEAjL-ZQxKjOAiCYojPfH-smNkmvp_sK_6xOOYk-ue9YyoHSInS5t4fCe0vY"
+      playerUrl: "https://biggboss20.live/video-player/VJ18YobVTvx6Xp7arvkkjb1LeiPziDI7vZY2ZcenwHvjYGB6tizkq4J7Pe5S_UsPS3uKqbsbRTx1iudixVQ7hiC6H-fn7xxSBiAJl-P-PxS_b1EMs5X1yudp0R9o30S-gVreOMdYhv8MfLEa7m2hk4gZvgA8-e6Dpm78FgDAETCuEgbBvbw"
     }, {
       id: "bb20-ep35",
       episodeNo: 35,
@@ -87,7 +87,7 @@ function db(){
 
 const SOURCE_URL_MIGRATIONS: Record<number, string> = {
   39: "https://biggboss20.live/video-player/m-QP-kbGuI2QgucgRJZj3eONDQ7B2nAkrdWO42uXj1jr0FwW_FNDrsCljUySJyVqwbJokbT2UGD6TRXV98MaK3bGh1Y-N9PRc9lgqFKFcUUd38IUfmoo5PQ2oZ4ZqbAe69HeEBA6XQ8qrVcshMxULnb3HjYh68apEOJbNCZy3u7E-D_rI2I",
-  38: "https://biggboss20.live/video-player/9TmVyffc3q_YoHKtvEgjKgNahExtyiPJ-CAg7d0feluMGFek_ckiYghCy7ZL_vpZ6LmKii144ka7ILSE_aeY51E-g1L0EnO1boZ3Ld966za0-KsCPaTiHK9MEAjL-ZQxKjOAiCYojPfH-smNkmvp_sK_6xOOYk-ue9YyoHSInS5t4fCe0vY",
+  38: "https://biggboss20.live/video-player/VJ18YobVTvx6Xp7arvkkjb1LeiPziDI7vZY2ZcenwHvjYGB6tizkq4J7Pe5S_UsPS3uKqbsbRTx1iudixVQ7hiC6H-fn7xxSBiAJl-P-PxS_b1EMs5X1yudp0R9o30S-gVreOMdYhv8MfLEa7m2hk4gZvgA8-e6Dpm78FgDAETCuEgbBvbw",
   37: "https://biggboss20.live/video-player/8xGQCf6-O9bg0E_bCcT0mrkuf5vHVu_4C6hzLF5gEKluz96uZcuTNu4-tn4q29FC9c0cH6PgoihvhB1jwdUrWj2MnniJjJNg7_TT-JX_Uq8xmbNJSGd4zW5pMOah4CRhMeAXnQHaer1PyE9lb8K1FrwcrAZU5VtF72X0rPIPImn0FB3VgvM",
   36: "https://biggboss20.live/video-player/y6oev8-gwLQ2mNvkSJUY5nyK8ZN5W_HNgv_MYLKFjjtk5bZ5U_F3sywK_e4RKjaO_4raW6D32yOkhgWox1vZu0cvG2252j5kOLnqadu0B0B7ksicX2mkWU2bms5YUpKxES6Q79YZh1L6KhgcA8EA65LdHMPZT4yjkYp1HaUsH_QIJJ88LVU",
   35: "https://biggboss20.live/video-player/N6MGtnn213YXuiyMEAfUbX_MzsP6TbM5ffwcE-zJaKB-3taP5G_JopdWMVK7By9evGQUPCFOSLiOJ_3lvcCDe0E3OlcCgba8a8qmfZv7jQgAaaUay1mT3bxDfQNHLVEi2WTMUTCncpsuq_YZ_zDA1UI112TohtRuuZ8kNFcLOkkoK2JatOI",
@@ -143,7 +143,7 @@ export async function getEpisodes():Promise<Episode[]>{
 
   await sql`DELETE FROM episodes WHERE episode_no = 38`;
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
-    VALUES ('bb20-ep38', 38, 'Bigg Boss 20 — Episode 38', '2026-10-13', 'https://biggboss20.live/video-player/9TmVyffc3q_YoHKtvEgjKgNahExtyiPJ-CAg7d0feluMGFek_ckiYghCy7ZL_vpZ6LmKii144ka7ILSE_aeY51E-g1L0EnO1boZ3Ld966za0-KsCPaTiHK9MEAjL-ZQxKjOAiCYojPfH-smNkmvp_sK_6xOOYk-ue9YyoHSInS5t4fCe0vY')
+    VALUES ('bb20-ep38', 38, 'Bigg Boss 20 — Episode 38', '2026-10-13', 'https://biggboss20.live/video-player/VJ18YobVTvx6Xp7arvkkjb1LeiPziDI7vZY2ZcenwHvjYGB6tizkq4J7Pe5S_UsPS3uKqbsbRTx1iudixVQ7hiC6H-fn7xxSBiAJl-P-PxS_b1EMs5X1yudp0R9o30S-gVreOMdYhv8MfLEa7m2hk4gZvgA8-e6Dpm78FgDAETCuEgbBvbw')
     ON CONFLICT (id) DO UPDATE SET
       player_url = EXCLUDED.player_url,
       title = EXCLUDED.title,
