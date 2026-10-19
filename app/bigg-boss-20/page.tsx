@@ -7,8 +7,20 @@ export const dynamic="force-dynamic";
 export default async function BiggBoss(){
   const dbEpisodes = await getEpisodes();
   const episodes = [...dbEpisodes];
+  if (!episodes.some((ep) => ep.episodeNo === 43)) {
+    episodes.push({ id: "bb20-ep43", episodeNo: 43, title: "Bigg Boss 20 — Episode 43", date: "2026-10-18", playerUrl: "https://biggboss20.live/video-player/VVuVMlhlOAEmCH9lt8Hsi023bUY3BFJTyXvFAJDfboSRHbvglpGSxMoqIcLV1ptPLKijdghab_WRLvCWwnFq_oGahLD_vtalKoV3HwmojnAcPJgEdHkRJeD4iUDeW7EUxIiASIn7agFU1mZmGi9Lr94gx9ensyKYckcgggEJyOby1oht7jQ" });
+  }
+  if (!episodes.some((ep) => ep.episodeNo === 42)) {
+    episodes.push({ id: "bb20-ep42", episodeNo: 42, title: "Bigg Boss 20 — Episode 42", date: "2026-10-17", playerUrl: "https://biggboss20.live/video-player/bt0unOGnL_hdoroP6gyHb3gGJAOQXUsuTRPy2_qBNMxEiaOjET7-9FWKA8rq-jFWhbGN_M5jpT49VKJ2J7BLsSt38_lBp8nUQTRLjc1z2HdWEtJrvtzKAVdEktSPfmsrSfvfvebvQsLGPr0bMDsQKL1CLbb2gbLrc2ebdM9ivGuFe_J6zSQ" });
+  }
+  if (!episodes.some((ep) => ep.episodeNo === 41)) {
+    episodes.push({ id: "bb20-ep41", episodeNo: 41, title: "Bigg Boss 20 — Episode 41", date: "2026-10-16", playerUrl: "https://biggboss20.live/video-player/35tIxjZ9n-_U5vgz6yxU9s02j_tGVpwPTI6B4ccXqIV4nFkplPHiR-OGL8hLqZTHN36RbKcgtoJ5wySdN-g8qwrX0Av6QG51KTyaeG5dsJZt9xqJUMrWvy6bXmFq_iHo-ugVdl4UU8iyV4cAlAi1bnpYQmcvNbOnCSRxjU1aNJDX1S5zJX8" });
+  }
+  if (!episodes.some((ep) => ep.episodeNo === 40)) {
+    episodes.push({ id: "bb20-ep40", episodeNo: 40, title: "Bigg Boss 20 — Episode 40", date: "2026-10-15", playerUrl: "https://biggboss20.live/video-player/UFCu16Lgpj8h4xP-VtrVSr1YQ-V_1wm71YbNUONfBmqRIVOk17twlFmuLxKZn7ZbTVW4EcJADCM54xUkwE9QZ9fD-zAmOKZqEWf6egS14PFS2JuNy2FRTIdM-UDV_sEypvmQUgdZoC9gBb-8WL5jtK52HTNSFRxlAGpG7jAoLYukpqAdjPc" });
+  }
   if (!episodes.some((ep) => ep.episodeNo === 39)) {
-    episodes.push({ id: "bb20-ep39", episodeNo: 39, title: "Bigg Boss 20 — Episode 39", date: "2026-10-14", playerUrl: "https://biggboss20.live/video-player/m-QP-kbGuI2QgucgRJZj3eONDQ7B2nAkrdWO42uXj1jr0FwW_FNDrsCljUySJyVqwbJokbT2UGD6TRXV98MaK3bGh1Y-N9PRc9lgqFKFcUUd38IUfmoo5PQ2oZ4ZqbAe69HeEBA6XQ8qrVcshMxULnb3HjYh68apEOJbNCZy3u7E-D_rI2I" });
+    episodes.push({ id: "bb20-ep39", episodeNo: 39, title: "Bigg Boss 20 — Episode 39", date: "2026-10-14", playerUrl: "https://biggboss20.live/video-player/Kqx9IdhTKBmX515Fqn2BMdAUtdcS4vj0EIWr3CIDmcw-LZbXDEJZ5UFuZu7zj9kjn0bqqu-iCKYhmAJMFbET4T3Qe-zoTAEz5Vfe1-FtZ6YdxEL_ChNgnDfxgHq_GxvP76sIjlNeib5agFB5pzRkNSMSMyciW3JaNwXy-dQq4-xOSoEUWjo" });
   }
   if (!episodes.some((ep) => ep.episodeNo === 38)) {
     episodes.push({ id: "bb20-ep38", episodeNo: 38, title: "Bigg Boss 20 — Episode 38", date: "2026-10-13", playerUrl: "https://biggboss20.live/video-player/VJ18YobVTvx6Xp7arvkkjb1LeiPziDI7vZY2ZcenwHvjYGB6tizkq4J7Pe5S_UsPS3uKqbsbRTx1iudixVQ7hiC6H-fn7xxSBiAJl-P-PxS_b1EMs5X1yudp0R9o30S-gVreOMdYhv8MfLEa7m2hk4gZvgA8-e6Dpm78FgDAETCuEgbBvbw" });
