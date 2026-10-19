@@ -162,6 +162,7 @@ function fileEpisodes():Episode[]{
       }
     ];
   }
+}
 
 function db(){
   return process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
