@@ -15,6 +15,15 @@ const filePath=path.join(process.cwd(),"data","episodes.json");
 function fileEpisodes():Episode[]{
   try{
     const episodes = JSON.parse(fs.readFileSync(filePath,"utf8")) as Episode[];
+    if (!episodes.some((ep) => ep.episodeNo === 46)) {
+      episodes.push({"id":"bb20-ep46","episodeNo":46,"title":"Bigg Boss 20 — Episode 46","date":"2026-10-21","playerUrl":"https://biggboss20.live/video-player/Jaz2X452Bl12H1sPkqqC-YrukgnpSgcVUIhBcFGkN2iYnxs8MdR65stIozx0MY9E59acYtFAS5RwzCA6n8E5xg6U5xJsWjQI_GxzyTkXrbHJwkp1Snhcrg7XHe3a_X5coi2ZGOW8cS04n40tdVynsvwxCWfOtQGTd7Myp668tGVXdSiA1u0"});
+    }
+    if (!episodes.some((ep) => ep.episodeNo === 45)) {
+      episodes.push({"id":"bb20-ep45","episodeNo":45,"title":"Bigg Boss 20 — Episode 45","date":"2026-10-20","playerUrl":"https://biggboss20.live/video-player/iQwxviPtmlc9HKiNGgtXRrWJl-cwGz0t7KxxW6ZGWgMeIF2_Myhye8RjSTB5Qw2CP9i1I8paGWNRjMhxG4kXe0fu_NzfoO3eg0uK6dd-iNJiUCCF2gWya6_Jt6Z1ufeyUXG4DbChELr4xUmLhvB0w8BwIm2jbxFhlyVaaMavxSVEboafYfk"});
+    }
+    if (!episodes.some((ep) => ep.episodeNo === 44)) {
+      episodes.push({"id":"bb20-ep44","episodeNo":44,"title":"Bigg Boss 20 — Episode 44","date":"2026-10-19","playerUrl":"https://biggboss20.live/video-player/Cx7JwXqUBUBgfGscOQd6gTIvhp8oN7EYBtxEk-BcZNBSWR_AK2-utvm8hhjbjQ2JmmouY7DW5Qsk3TbBGdHulUhu1LGCX5b2QmegEWOnXcRvvqmSAy80CDgBqUODvWXLUKuquUevhLNMKFkoKQ9-zEPF_f9MH2CiJGbux-epJVFBlERMA4A"});
+    }
     if (!episodes.some((ep) => ep.episodeNo === 43)) {
       episodes.push({
         id: "bb20-ep43",
@@ -90,6 +99,9 @@ function fileEpisodes():Episode[]{
     return episodes.sort((a,b)=>b.episodeNo-a.episodeNo);
   }catch{
     return [
+      {"id":"bb20-ep46","episodeNo":46,"title":"Bigg Boss 20 — Episode 46","date":"2026-10-21","playerUrl":"https://biggboss20.live/video-player/Jaz2X452Bl12H1sPkqqC-YrukgnpSgcVUIhBcFGkN2iYnxs8MdR65stIozx0MY9E59acYtFAS5RwzCA6n8E5xg6U5xJsWjQI_GxzyTkXrbHJwkp1Snhcrg7XHe3a_X5coi2ZGOW8cS04n40tdVynsvwxCWfOtQGTd7Myp668tGVXdSiA1u0"},
+      {"id":"bb20-ep45","episodeNo":45,"title":"Bigg Boss 20 — Episode 45","date":"2026-10-20","playerUrl":"https://biggboss20.live/video-player/iQwxviPtmlc9HKiNGgtXRrWJl-cwGz0t7KxxW6ZGWgMeIF2_Myhye8RjSTB5Qw2CP9i1I8paGWNRjMhxG4kXe0fu_NzfoO3eg0uK6dd-iNJiUCCF2gWya6_Jt6Z1ufeyUXG4DbChELr4xUmLhvB0w8BwIm2jbxFhlyVaaMavxSVEboafYfk"},
+      {"id":"bb20-ep44","episodeNo":44,"title":"Bigg Boss 20 — Episode 44","date":"2026-10-19","playerUrl":"https://biggboss20.live/video-player/Cx7JwXqUBUBgfGscOQd6gTIvhp8oN7EYBtxEk-BcZNBSWR_AK2-utvm8hhjbjQ2JmmouY7DW5Qsk3TbBGdHulUhu1LGCX5b2QmegEWOnXcRvvqmSAy80CDgBqUODvWXLUKuquUevhLNMKFkoKQ9-zEPF_f9MH2CiJGbux-epJVFBlERMA4A"},
       {
         id: "bb20-ep43",
         episodeNo: 43,
@@ -169,6 +181,9 @@ function db(){
 }
 
 const SOURCE_URL_MIGRATIONS: Record<number, string> = {
+  46: "https://biggboss20.live/video-player/Jaz2X452Bl12H1sPkqqC-YrukgnpSgcVUIhBcFGkN2iYnxs8MdR65stIozx0MY9E59acYtFAS5RwzCA6n8E5xg6U5xJsWjQI_GxzyTkXrbHJwkp1Snhcrg7XHe3a_X5coi2ZGOW8cS04n40tdVynsvwxCWfOtQGTd7Myp668tGVXdSiA1u0",
+  45: "https://biggboss20.live/video-player/iQwxviPtmlc9HKiNGgtXRrWJl-cwGz0t7KxxW6ZGWgMeIF2_Myhye8RjSTB5Qw2CP9i1I8paGWNRjMhxG4kXe0fu_NzfoO3eg0uK6dd-iNJiUCCF2gWya6_Jt6Z1ufeyUXG4DbChELr4xUmLhvB0w8BwIm2jbxFhlyVaaMavxSVEboafYfk",
+  44: "https://biggboss20.live/video-player/Cx7JwXqUBUBgfGscOQd6gTIvhp8oN7EYBtxEk-BcZNBSWR_AK2-utvm8hhjbjQ2JmmouY7DW5Qsk3TbBGdHulUhu1LGCX5b2QmegEWOnXcRvvqmSAy80CDgBqUODvWXLUKuquUevhLNMKFkoKQ9-zEPF_f9MH2CiJGbux-epJVFBlERMA4A",
   43: "https://biggboss20.live/video-player/VVuVMlhlOAEmCH9lt8Hsi023bUY3BFJTyXvFAJDfboSRHbvglpGSxMoqIcLV1ptPLKijdghab_WRLvCWwnFq_oGahLD_vtalKoV3HwmojnAcPJgEdHkRJeD4iUDeW7EUxIiASIn7agFU1mZmGi9Lr94gx9ensyKYckcgggEJyOby1oht7jQ",
   42: "https://biggboss20.live/video-player/bt0unOGnL_hdoroP6gyHb3gGJAOQXUsuTRPy2_qBNMxEiaOjET7-9FWKA8rq-jFWhbGN_M5jpT49VKJ2J7BLsSt38_lBp8nUQTRLjc1z2HdWEtJrvtzKAVdEktSPfmsrSfvfvebvQsLGPr0bMDsQKL1CLbb2gbLrc2ebdM9ivGuFe_J6zSQ",
   41: "https://biggboss20.live/video-player/35tIxjZ9n-_U5vgz6yxU9s02j_tGVpwPTI6B4ccXqIV4nFkplPHiR-OGL8hLqZTHN36RbKcgtoJ5wySdN-g8qwrX0Av6QG51KTyaeG5dsJZt9xqJUMrWvy6bXmFq_iHo-ugVdl4UU8iyV4cAlAi1bnpYQmcvNbOnCSRxjU1aNJDX1S5zJX8",
@@ -212,6 +227,19 @@ export async function getEpisodes():Promise<Episode[]>{
   if(!sql) return fileEpisodes();
 
   await ensureTable(sql);
+
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep46', 46, 'Bigg Boss 20 — Episode 46', '2026-10-21', 'https://biggboss20.live/video-player/Jaz2X452Bl12H1sPkqqC-YrukgnpSgcVUIhBcFGkN2iYnxs8MdR65stIozx0MY9E59acYtFAS5RwzCA6n8E5xg6U5xJsWjQI_GxzyTkXrbHJwkp1Snhcrg7XHe3a_X5coi2ZGOW8cS04n40tdVynsvwxCWfOtQGTd7Myp668tGVXdSiA1u0')
+    ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
+
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep45', 45, 'Bigg Boss 20 — Episode 45', '2026-10-20', 'https://biggboss20.live/video-player/iQwxviPtmlc9HKiNGgtXRrWJl-cwGz0t7KxxW6ZGWgMeIF2_Myhye8RjSTB5Qw2CP9i1I8paGWNRjMhxG4kXe0fu_NzfoO3eg0uK6dd-iNJiUCCF2gWya6_Jt6Z1ufeyUXG4DbChELr4xUmLhvB0w8BwIm2jbxFhlyVaaMavxSVEboafYfk')
+    ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
+
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep44', 44, 'Bigg Boss 20 — Episode 44', '2026-10-19', 'https://biggboss20.live/video-player/Cx7JwXqUBUBgfGscOQd6gTIvhp8oN7EYBtxEk-BcZNBSWR_AK2-utvm8hhjbjQ2JmmouY7DW5Qsk3TbBGdHulUhu1LGCX5b2QmegEWOnXcRvvqmSAy80CDgBqUODvWXLUKuquUevhLNMKFkoKQ9-zEPF_f9MH2CiJGbux-epJVFBlERMA4A')
+    ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
+
 
   await sql`DELETE FROM episodes WHERE episode_no = 43`;
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
