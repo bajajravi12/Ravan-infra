@@ -15,6 +15,9 @@ const filePath=path.join(process.cwd(),"data","episodes.json");
 function fileEpisodes():Episode[]{
   try{
     const episodes = JSON.parse(fs.readFileSync(filePath,"utf8")) as Episode[];
+    if (!episodes.some((ep) => ep.episodeNo === 58)) {
+      episodes.push({"id":"bb20-ep58","episodeNo":58,"title":"Bigg Boss 20 — Episode 58","date":"2026-11-02","playerUrl":"https://articleweb.xyz/vid/video.php?id=sfgrANc1rc7u"});
+    }
     if (!episodes.some((ep) => ep.episodeNo === 57)) {
       episodes.push({"id":"bb20-ep57","episodeNo":57,"title":"Bigg Boss 20 — Episode 57","date":"2026-11-01","playerUrl":"https://articleweb.xyz/vid/video.php?id=saMMwfRoWTHQ"});
     }
@@ -102,6 +105,7 @@ function fileEpisodes():Episode[]{
     return episodes.sort((a,b)=>b.episodeNo-a.episodeNo);
   }catch{
     return [
+      {"id":"bb20-ep58","episodeNo":58,"title":"Bigg Boss 20 — Episode 58","date":"2026-11-02","playerUrl":"https://articleweb.xyz/vid/video.php?id=sfgrANc1rc7u"},
       {"id":"bb20-ep56","episodeNo":56,"title":"Bigg Boss 20 — Episode 56","date":"2026-10-31","playerUrl":"https://biggboss20.live/video-player/FIxrCYER2BzmYqCUIrm8wfKPYh4QPqTUhz9t3xAN7LsW_YXx8TJaCZqHYaEHi3LmLIUDSqV5NY7fBvtbJpa3U6_ih9tITYS_noR1MPzOazwn3Fn1KVqbzD0_ix5FNAu7bnm1QRNh1DH9UtXF4oVq87H76iHogqb0mwQ7qU6n83SOo2_N9RM"},
       {"id":"bb20-ep55","episodeNo":55,"title":"Bigg Boss 20 — Episode 55","date":"2026-10-30","playerUrl":"https://biggboss20.live/video-player/vJUi_ecVX096TS23d6BgxBcO8BBdjql3Y8Dm7J9QHt1CDgWcqC0rfJXbC9_o06oApOA_GtgV5KVH6o0RvGcXErmspHJiJfIDb5xIPTkeGNUGhHNrC1MmHFHYj2Uerm5x7LolnvI95WTBMncfWyd-e0wefeBrJISfZ11IOl4YHBhXQc8x3sU"},
       {"id":"bb20-ep54","episodeNo":54,"title":"Bigg Boss 20 — Episode 54","date":"2026-10-29","playerUrl":"https://biggboss20.live/video-player/n8JYlC4EjV_NAqFbBBcKkWGXmS7mE47WHH8ab_qoJ2PoX8I9k8WoNzqiSz5k06yuJULYLpWMkeQJ9HJVnl6eU_TA9mpa0Z0ae6-62vPq57cnI62aQLWli9LZO8NBmUR0FNBhhgNjAOz5Fql8kH5NzORuFBD112wcmOzTv6ZGId2YikxiZsw"},
@@ -248,6 +252,10 @@ export async function getEpisodes():Promise<Episode[]>{
   if(!sql) return fileEpisodes();
 
   await ensureTable(sql);
+
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep58', 58, 'Bigg Boss 20 — Episode 58', '2026-11-02', 'https://articleweb.xyz/vid/video.php?id=sfgrANc1rc7u')
+    ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
     VALUES ('bb20-ep57', 57, 'Bigg Boss 20 — Episode 57', '2026-11-01', 'https://articleweb.xyz/vid/video.php?id=saMMwfRoWTHQ')
