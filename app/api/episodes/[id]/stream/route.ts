@@ -22,14 +22,14 @@ function getArticleHost(url: string) {
 
 function findHlsUrl(html: string, baseUrl: string): string | null {
   const candidates = html.match(
-    /(?:https?:)?\\/\\/[^"'<>\\s]+?\\.m3u8(?:\\?[^"'<>\\s]*)?|(?:\\/|\\.\\.?\\/)[^"'<>\\s]+?\\.m3u8(?:\\?[^"'<>\\s]*)?/gi
+    /(?:https?:)?\/\/[^"'<>\s]+?\.m3u8(?:\?[^"'<>\s]*)?|(?:\/|\.{1,2}\/)[^"'<>\s]+?\.m3u8(?:\?[^"'<>\s]*)?/gi
   ) ?? [];
 
   for (const candidate of candidates) {
     try {
-      const normalized = candidate.startsWith("//") ? `https:${candidate}` : candidate;
+      const normalized = candidate.startsWith("//") ? \`https:\${candidate}\` : candidate;
       const parsed = new URL(normalized, baseUrl);
-      if (parsed.protocol === "https:" && /\\.m3u8$/i.test(parsed.pathname)) {
+      if (parsed.protocol === "https:" && /\.m3u8$/i.test(parsed.pathname)) {
         return parsed.toString();
       }
     } catch {
