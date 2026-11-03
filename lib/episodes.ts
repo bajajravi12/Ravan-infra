@@ -19,7 +19,7 @@ function fileEpisodes():Episode[]{
       episodes.push({"id":"bb20-ep58","episodeNo":58,"title":"Bigg Boss 20 — Episode 58","date":"2026-11-02","playerUrl":"https://articleweb.xyz/vid/video.php?id=sfgrANc1rc7u"});
     }
     if (!episodes.some((ep) => ep.episodeNo === 57)) {
-      episodes.push({"id":"bb20-ep57","episodeNo":57,"title":"Bigg Boss 20 — Episode 57","date":"2026-11-01","playerUrl":"https://articleweb.xyz/vid/video.php?id=saMMwfRoWTHQ"});
+      episodes.push({"id":"bb20-ep57","episodeNo":57,"title":"Bigg Boss 20 — Episode 57","date":"2026-11-01","playerUrl":"https://articleweb.xyz/vid/video.php?id=NpL1pMu4IVjXV"});
     }
     if (!episodes.some((ep) => ep.episodeNo === 46)) {
       episodes.push({"id":"bb20-ep46","episodeNo":46,"title":"Bigg Boss 20 — Episode 46","date":"2026-10-21","playerUrl":"https://biggboss20.live/video-player/Jaz2X452Bl12H1sPkqqC-YrukgnpSgcVUIhBcFGkN2iYnxs8MdR65stIozx0MY9E59acYtFAS5RwzCA6n8E5xg6U5xJsWjQI_GxzyTkXrbHJwkp1Snhcrg7XHe3a_X5coi2ZGOW8cS04n40tdVynsvwxCWfOtQGTd7Myp668tGVXdSiA1u0"});
@@ -258,7 +258,7 @@ export async function getEpisodes():Promise<Episode[]>{
     ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
-    VALUES ('bb20-ep57', 57, 'Bigg Boss 20 — Episode 57', '2026-11-01', 'https://articleweb.xyz/vid/video.php?id=saMMwfRoWTHQ')
+    VALUES ('bb20-ep57', 57, 'Bigg Boss 20 — Episode 57', '2026-11-01', 'https://articleweb.xyz/vid/video.php?id=NpL1pMu4IVjXV')
     ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
