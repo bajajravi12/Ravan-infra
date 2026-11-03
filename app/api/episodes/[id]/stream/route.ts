@@ -20,6 +20,26 @@ function getArticleHost(url: string) {
   }
 }
 
+function findHlsUrl(html: string, baseUrl: string): string | null {
+  const candidates = html.match(
+    /(?:https?:)?\\/\\/[^"'<>\\s]+?\\.m3u8(?:\\?[^"'<>\\s]*)?|(?:\\/|\\.\\.?\\/)[^"'<>\\s]+?\\.m3u8(?:\\?[^"'<>\\s]*)?/gi
+  ) ?? [];
+
+  for (const candidate of candidates) {
+    try {
+      const normalized = candidate.startsWith("//") ? `https:${candidate}` : candidate;
+      const parsed = new URL(normalized, baseUrl);
+      if (parsed.protocol === "https:" && /\\.m3u8$/i.test(parsed.pathname)) {
+        return parsed.toString();
+      }
+    } catch {
+      // Ignore malformed candidates.
+    }
+  }
+
+  return null;
+}
+
 async function resolveArticleWeb(sourceUrl: string): Promise<string | null> {
   const sourceHost = getArticleHost(sourceUrl);
 
@@ -42,17 +62,15 @@ async function resolveArticleWeb(sourceUrl: string): Promise<string | null> {
 
   const html = normalizeHtml(await first.text());
 
-  const direct = html.match(
-    /https:\/\/streaming\.disk\.yandex\.net\/hls\/[^"'<>\s]+?master-playlist\.m3u8/i
-  );
-  if (direct?.[0]) return direct[0];
+  const directHls = findHlsUrl(html, sourceUrl);
+  if (directHls) return directHls;
 
   const gdriveMatch = html.match(
     /(?:https?:)?\/\/[^"'<>\s]+gdrive\.php[^"'<>\s]*/i
   );
 
   if (!gdriveMatch?.[0]) {
-    throw new Error("No intermediate video URL found");
+    return null;
   }
 
   const gdriveUrl = new URL(
@@ -80,11 +98,7 @@ async function resolveArticleWeb(sourceUrl: string): Promise<string | null> {
 
   const html2 = normalizeHtml(await second.text());
 
-  const hls = html2.match(
-    /https:\/\/streaming\.disk\.yandex\.net\/hls\/[^"'<>\s]+?master-playlist\.m3u8/i
-  );
-
-  return hls?.[0] || null;
+  return findHlsUrl(html2, gdriveUrl);
 }
 
 export async function GET(
