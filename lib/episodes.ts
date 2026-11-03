@@ -15,6 +15,9 @@ const filePath=path.join(process.cwd(),"data","episodes.json");
 function fileEpisodes():Episode[]{
   try{
     const episodes = JSON.parse(fs.readFileSync(filePath,"utf8")) as Episode[];
+    if (!episodes.some((ep) => ep.episodeNo === 57)) {
+      episodes.push({"id":"bb20-ep57","episodeNo":57,"title":"Bigg Boss 20 — Episode 57","date":"2026-11-01","playerUrl":"https://articleweb.xyz/vid/video.php?id=saMMwfRoWTHQ"});
+    }
     if (!episodes.some((ep) => ep.episodeNo === 46)) {
       episodes.push({"id":"bb20-ep46","episodeNo":46,"title":"Bigg Boss 20 — Episode 46","date":"2026-10-21","playerUrl":"https://biggboss20.live/video-player/Jaz2X452Bl12H1sPkqqC-YrukgnpSgcVUIhBcFGkN2iYnxs8MdR65stIozx0MY9E59acYtFAS5RwzCA6n8E5xg6U5xJsWjQI_GxzyTkXrbHJwkp1Snhcrg7XHe3a_X5coi2ZGOW8cS04n40tdVynsvwxCWfOtQGTd7Myp668tGVXdSiA1u0"});
     }
@@ -245,6 +248,10 @@ export async function getEpisodes():Promise<Episode[]>{
   if(!sql) return fileEpisodes();
 
   await ensureTable(sql);
+
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep57', 57, 'Bigg Boss 20 — Episode 57', '2026-11-01', 'https://articleweb.xyz/vid/video.php?id=saMMwfRoWTHQ')
+    ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
     VALUES ('bb20-ep56', 56, 'Bigg Boss 20 — Episode 56', '2026-10-31', 'https://biggboss20.live/video-player/FIxrCYER2BzmYqCUIrm8wfKPYh4QPqTUhz9t3xAN7LsW_YXx8TJaCZqHYaEHi3LmLIUDSqV5NY7fBvtbJpa3U6_ih9tITYS_noR1MPzOazwn3Fn1KVqbzD0_ix5FNAu7bnm1QRNh1DH9UtXF4oVq87H76iHogqb0mwQ7qU6n83SOo2_N9RM')
