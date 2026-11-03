@@ -27,7 +27,7 @@ function findHlsUrl(html: string, baseUrl: string): string | null {
 
   for (const candidate of candidates) {
     try {
-      const normalized = candidate.startsWith("//") ? \`https:\${candidate}\` : candidate;
+      const normalized = candidate.startsWith("//") ? "https:" + candidate : candidate;
       const parsed = new URL(normalized, baseUrl);
       if (parsed.protocol === "https:" && /\.m3u8$/i.test(parsed.pathname)) {
         return parsed.toString();
