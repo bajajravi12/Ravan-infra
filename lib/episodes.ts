@@ -16,10 +16,19 @@ function fileEpisodes():Episode[]{
   try{
     const episodes = JSON.parse(fs.readFileSync(filePath,"utf8")) as Episode[];
     if (!episodes.some((ep) => ep.episodeNo === 58)) {
-      episodes.push({"id":"bb20-ep58","episodeNo":58,"title":"Bigg Boss 20 — Episode 58","date":"2026-11-02","playerUrl":"https://articleweb.xyz/vid/video.php?id=sfgrANc1rc7u"});
+      episodes.push({"id":"bb20-ep58","episodeNo":58,"title":"Bigg Boss 20 — Episode 58","date":"2026-11-02","playerUrl":"https://biggboss20.live/video-player/1yVByfKeUZdAvsvzgwYFR2kX4anPDQQjc2FsboojyNNaPUj4Et6xvOeA4QDoHC5pe6mK7w0ShLTw-PvTY6t4tSZ6dxwJbzWVCOo9ELCldwyORTTt6duXkYMfZ1CJ3vJ5wyByNxYWgLQB7TB9ArWs05IuZkgwRA3eCwcvihknCqOyr8UrLHs"});
     }
     if (!episodes.some((ep) => ep.episodeNo === 57)) {
-      episodes.push({"id":"bb20-ep57","episodeNo":57,"title":"Bigg Boss 20 — Episode 57","date":"2026-11-01","playerUrl":"https://articleweb.xyz/vid/video.php?id=NpL1pMu4IVjXV"});
+      episodes.push({"id":"bb20-ep57","episodeNo":57,"title":"Bigg Boss 20 — Episode 57","date":"2026-11-01","playerUrl":"https://biggboss20.live/video-player/kwyTkt6T-HxXHCccN9VuZKTjR4SWecIu9un3wGfX02ja00lt5lK7BR7mqhYZ16YUxqZ2UK3G0gj3nVlFlFEnyXYI6DZ5MUwGnQ1oAQp3SGwV9kCI_2aUsUXpgU0w-HB9Yc95mTdwHvE_75wUtvXcWqaNx0u5oIEwD672HotsLy_4T677FQE"});
+    }
+    if (!episodes.some((ep) => ep.episodeNo === 59)) {
+      episodes.push({"id":"bb20-ep59","episodeNo":59,"title":"Bigg Boss 20 — Episode 59","date":"2026-11-03","playerUrl":"https://biggboss20.live/video-player/qHllbpVF8kEpY796tGMEbJU1EGz_UP5Bhg92-IrGofhfGGAcuugzDVm43XZKi-t12LdlYK7C-ehePqQ92Bc1LPO_70BcPYaRxHoavspRSPR80LSdqVvteV2z8mI-zeqIpIIEdSD5nMn_EGtBzSHQj0uVnNj9fIb0rUL5GlgAWVzBNeIWrX8"});
+    }
+    if (!episodes.some((ep) => ep.episodeNo === 60)) {
+      episodes.push({"id":"bb20-ep60","episodeNo":60,"title":"Bigg Boss 20 — Episode 60","date":"2026-11-04","playerUrl":"https://biggboss20.live/video-player/SYu4rPwiXjnA-dBPRdwu3JIX_6ydYn80J49LIe_QwKEefdNeJ0RPupl2FxmBVaZ5tpVWMknHP24ttpL05BlQdMFYCNykCn92ubCMEtoSWWooF3M2WOgkEurEC6dOb_O0gUZBXallO344jpnSbKHLe1tAplLIh33c08eWgKzcAVc5sHPX_wE"});
+    }
+    if (!episodes.some((ep) => ep.episodeNo === 61)) {
+      episodes.push({"id":"bb20-ep61","episodeNo":61,"title":"Bigg Boss 20 — Episode 61","date":"2026-11-05","playerUrl":"https://biggboss20.live/video-player/M_j6QUhhJJqDD_XonVubPpKC9spmuDp3JO_FB9vDvcATpML4c9B0d7u7oNXZ4W7scM-tBloPWUDebZjGBdiOO_c5drVuTN-vRu-3po6HAzIHEG1FBcJdzaHxhI0k7pHD7wK50ZwM730lTdXEu7IKuhdLClqVFcMBSeb5x4oddXKNwd_7u1Q"});
     }
     if (!episodes.some((ep) => ep.episodeNo === 46)) {
       episodes.push({"id":"bb20-ep46","episodeNo":46,"title":"Bigg Boss 20 — Episode 46","date":"2026-10-21","playerUrl":"https://biggboss20.live/video-player/Jaz2X452Bl12H1sPkqqC-YrukgnpSgcVUIhBcFGkN2iYnxs8MdR65stIozx0MY9E59acYtFAS5RwzCA6n8E5xg6U5xJsWjQI_GxzyTkXrbHJwkp1Snhcrg7XHe3a_X5coi2ZGOW8cS04n40tdVynsvwxCWfOtQGTd7Myp668tGVXdSiA1u0"});
@@ -105,7 +114,7 @@ function fileEpisodes():Episode[]{
     return episodes.sort((a,b)=>b.episodeNo-a.episodeNo);
   }catch{
     return [
-      {"id":"bb20-ep58","episodeNo":58,"title":"Bigg Boss 20 — Episode 58","date":"2026-11-02","playerUrl":"https://articleweb.xyz/vid/video.php?id=sfgrANc1rc7u"},
+      {"id":"bb20-ep58","episodeNo":58,"title":"Bigg Boss 20 — Episode 58","date":"2026-11-02","playerUrl":"https://biggboss20.live/video-player/1yVByfKeUZdAvsvzgwYFR2kX4anPDQQjc2FsboojyNNaPUj4Et6xvOeA4QDoHC5pe6mK7w0ShLTw-PvTY6t4tSZ6dxwJbzWVCOo9ELCldwyORTTt6duXkYMfZ1CJ3vJ5wyByNxYWgLQB7TB9ArWs05IuZkgwRA3eCwcvihknCqOyr8UrLHs"},
       {"id":"bb20-ep56","episodeNo":56,"title":"Bigg Boss 20 — Episode 56","date":"2026-10-31","playerUrl":"https://biggboss20.live/video-player/FIxrCYER2BzmYqCUIrm8wfKPYh4QPqTUhz9t3xAN7LsW_YXx8TJaCZqHYaEHi3LmLIUDSqV5NY7fBvtbJpa3U6_ih9tITYS_noR1MPzOazwn3Fn1KVqbzD0_ix5FNAu7bnm1QRNh1DH9UtXF4oVq87H76iHogqb0mwQ7qU6n83SOo2_N9RM"},
       {"id":"bb20-ep55","episodeNo":55,"title":"Bigg Boss 20 — Episode 55","date":"2026-10-30","playerUrl":"https://biggboss20.live/video-player/vJUi_ecVX096TS23d6BgxBcO8BBdjql3Y8Dm7J9QHt1CDgWcqC0rfJXbC9_o06oApOA_GtgV5KVH6o0RvGcXErmspHJiJfIDb5xIPTkeGNUGhHNrC1MmHFHYj2Uerm5x7LolnvI95WTBMncfWyd-e0wefeBrJISfZ11IOl4YHBhXQc8x3sU"},
       {"id":"bb20-ep54","episodeNo":54,"title":"Bigg Boss 20 — Episode 54","date":"2026-10-29","playerUrl":"https://biggboss20.live/video-player/n8JYlC4EjV_NAqFbBBcKkWGXmS7mE47WHH8ab_qoJ2PoX8I9k8WoNzqiSz5k06yuJULYLpWMkeQJ9HJVnl6eU_TA9mpa0Z0ae6-62vPq57cnI62aQLWli9LZO8NBmUR0FNBhhgNjAOz5Fql8kH5NzORuFBD112wcmOzTv6ZGId2YikxiZsw"},
@@ -254,11 +263,23 @@ export async function getEpisodes():Promise<Episode[]>{
   await ensureTable(sql);
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
-    VALUES ('bb20-ep58', 58, 'Bigg Boss 20 — Episode 58', '2026-11-02', 'https://articleweb.xyz/vid/video.php?id=sfgrANc1rc7u')
+    VALUES ('bb20-ep58', 58, 'Bigg Boss 20 — Episode 58', '2026-11-02', 'https://biggboss20.live/video-player/1yVByfKeUZdAvsvzgwYFR2kX4anPDQQjc2FsboojyNNaPUj4Et6xvOeA4QDoHC5pe6mK7w0ShLTw-PvTY6t4tSZ6dxwJbzWVCOo9ELCldwyORTTt6duXkYMfZ1CJ3vJ5wyByNxYWgLQB7TB9ArWs05IuZkgwRA3eCwcvihknCqOyr8UrLHs')
     ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
-    VALUES ('bb20-ep57', 57, 'Bigg Boss 20 — Episode 57', '2026-11-01', 'https://articleweb.xyz/vid/video.php?id=NpL1pMu4IVjXV')
+    VALUES ('bb20-ep57', 57, 'Bigg Boss 20 — Episode 57', '2026-11-01', 'https://biggboss20.live/video-player/kwyTkt6T-HxXHCccN9VuZKTjR4SWecIu9un3wGfX02ja00lt5lK7BR7mqhYZ16YUxqZ2UK3G0gj3nVlFlFEnyXYI6DZ5MUwGnQ1oAQp3SGwV9kCI_2aUsUXpgU0w-HB9Yc95mTdwHvE_75wUtvXcWqaNx0u5oIEwD672HotsLy_4T677FQE')
+    ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
+
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep59', 59, 'Bigg Boss 20 — Episode 59', '2026-11-03', 'https://biggboss20.live/video-player/qHllbpVF8kEpY796tGMEbJU1EGz_UP5Bhg92-IrGofhfGGAcuugzDVm43XZKi-t12LdlYK7C-ehePqQ92Bc1LPO_70BcPYaRxHoavspRSPR80LSdqVvteV2z8mI-zeqIpIIEdSD5nMn_EGtBzSHQj0uVnNj9fIb0rUL5GlgAWVzBNeIWrX8')
+    ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
+
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep60', 60, 'Bigg Boss 20 — Episode 60', '2026-11-04', 'https://biggboss20.live/video-player/SYu4rPwiXjnA-dBPRdwu3JIX_6ydYn80J49LIe_QwKEefdNeJ0RPupl2FxmBVaZ5tpVWMknHP24ttpL05BlQdMFYCNykCn92ubCMEtoSWWooF3M2WOgkEurEC6dOb_O0gUZBXallO344jpnSbKHLe1tAplLIh33c08eWgKzcAVc5sHPX_wE')
+    ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
+
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep61', 61, 'Bigg Boss 20 — Episode 61', '2026-11-05', 'https://biggboss20.live/video-player/M_j6QUhhJJqDD_XonVubPpKC9spmuDp3JO_FB9vDvcATpML4c9B0d7u7oNXZ4W7scM-tBloPWUDebZjGBdiOO_c5drVuTN-vRu-3po6HAzIHEG1FBcJdzaHxhI0k7pHD7wK50ZwM730lTdXEu7IKuhdLClqVFcMBSeb5x4oddXKNwd_7u1Q')
     ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
