@@ -30,6 +30,15 @@ function fileEpisodes():Episode[]{
     if (!episodes.some((ep) => ep.episodeNo === 61)) {
       episodes.push({"id":"bb20-ep61","episodeNo":61,"title":"Bigg Boss 20 — Episode 61","date":"2026-11-05","playerUrl":"https://biggboss20.live/video-player/M_j6QUhhJJqDD_XonVubPpKC9spmuDp3JO_FB9vDvcATpML4c9B0d7u7oNXZ4W7scM-tBloPWUDebZjGBdiOO_c5drVuTN-vRu-3po6HAzIHEG1FBcJdzaHxhI0k7pHD7wK50ZwM730lTdXEu7IKuhdLClqVFcMBSeb5x4oddXKNwd_7u1Q"});
     }
+    if (!episodes.some((ep) => ep.episodeNo === 62)) {
+      episodes.push({"id":"bb20-ep62","episodeNo":62,"title":"Bigg Boss 20 — Episode 62","date":"2026-11-06","playerUrl":"https://biggboss20.live/video-player/f-emNGZYzNx1wU5RMj2MwaoxkVg-BwGx_pmCN19yS4brCChUh7SDZHi7vB2B-PY0xTvFiRbG8frBpVedlL_ruoaULRoiTYZ3pwh6bVTatmC8lmf7i0sF8OqAi4aMri0vSyhr0eoLA4hbj7n5XAW39CnGEgD2lfT5n25fGrrPfJi9ZHZReHg"});
+    }
+    if (!episodes.some((ep) => ep.episodeNo === 63)) {
+      episodes.push({"id":"bb20-ep63","episodeNo":63,"title":"Bigg Boss 20 — Episode 63","date":"2026-11-07","playerUrl":"https://biggboss20.live/video-player/bSMty5Pt61UsyPHOB5djL7z9ZgmNYZPygLsDQt8-7iVNEC03BlEfSSh5j7GQFZsbRXOF49bDlzkBo1BsXc0LT3EAZdE5tbVv6fTCY9DXL5LiU8Tbdu-9v5285TSujDdoaqDy3w7N-GuVd6l5MqyOoJLSLea4uUMFq9nm_qnfEDAw9QpyQCU"});
+    }
+    if (!episodes.some((ep) => ep.episodeNo === 64)) {
+      episodes.push({"id":"bb20-ep64","episodeNo":64,"title":"Bigg Boss 20 — Episode 64","date":"2026-11-08","playerUrl":"https://biggboss20.live/video-player/0WPzOFXFreyiU8Gzq0n94OSycCZ8kMnH7iFWfQkwcwmvocdmm9kWiJCHctdWjF0azWX8FsQ1lFYCYt3VKrbdWOaVljionUxyT98SJmYokiCEcq5cdGoxZjue0K7J3qV3G3hZ99SUz2BgM7Zzh1DI0vINwrz0w9v2ZKFo8zMqD0xZQjKA5r0"});
+    }
     if (!episodes.some((ep) => ep.episodeNo === 46)) {
       episodes.push({"id":"bb20-ep46","episodeNo":46,"title":"Bigg Boss 20 — Episode 46","date":"2026-10-21","playerUrl":"https://biggboss20.live/video-player/Jaz2X452Bl12H1sPkqqC-YrukgnpSgcVUIhBcFGkN2iYnxs8MdR65stIozx0MY9E59acYtFAS5RwzCA6n8E5xg6U5xJsWjQI_GxzyTkXrbHJwkp1Snhcrg7XHe3a_X5coi2ZGOW8cS04n40tdVynsvwxCWfOtQGTd7Myp668tGVXdSiA1u0"});
     }
@@ -280,6 +289,18 @@ export async function getEpisodes():Promise<Episode[]>{
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
     VALUES ('bb20-ep61', 61, 'Bigg Boss 20 — Episode 61', '2026-11-05', 'https://biggboss20.live/video-player/M_j6QUhhJJqDD_XonVubPpKC9spmuDp3JO_FB9vDvcATpML4c9B0d7u7oNXZ4W7scM-tBloPWUDebZjGBdiOO_c5drVuTN-vRu-3po6HAzIHEG1FBcJdzaHxhI0k7pHD7wK50ZwM730lTdXEu7IKuhdLClqVFcMBSeb5x4oddXKNwd_7u1Q')
+    ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
+
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep62', 62, 'Bigg Boss 20 — Episode 62', '2026-11-06', 'https://biggboss20.live/video-player/f-emNGZYzNx1wU5RMj2MwaoxkVg-BwGx_pmCN19yS4brCChUh7SDZHi7vB2B-PY0xTvFiRbG8frBpVedlL_ruoaULRoiTYZ3pwh6bVTatmC8lmf7i0sF8OqAi4aMri0vSyhr0eoLA4hbj7n5XAW39CnGEgD2lfT5n25fGrrPfJi9ZHZReHg')
+    ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
+
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep63', 63, 'Bigg Boss 20 — Episode 63', '2026-11-07', 'https://biggboss20.live/video-player/bSMty5Pt61UsyPHOB5djL7z9ZgmNYZPygLsDQt8-7iVNEC03BlEfSSh5j7GQFZsbRXOF49bDlzkBo1BsXc0LT3EAZdE5tbVv6fTCY9DXL5LiU8Tbdu-9v5285TSujDdoaqDy3w7N-GuVd6l5MqyOoJLSLea4uUMFq9nm_qnfEDAw9QpyQCU')
+    ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
+
+  await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
+    VALUES ('bb20-ep64', 64, 'Bigg Boss 20 — Episode 64', '2026-11-08', 'https://biggboss20.live/video-player/0WPzOFXFreyiU8Gzq0n94OSycCZ8kMnH7iFWfQkwcwmvocdmm9kWiJCHctdWjF0azWX8FsQ1lFYCYt3VKrbdWOaVljionUxyT98SJmYokiCEcq5cdGoxZjue0K7J3qV3G3hZ99SUz2BgM7Zzh1DI0vINwrz0w9v2ZKFo8zMqD0xZQjKA5r0')
     ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
