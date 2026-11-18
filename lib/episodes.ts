@@ -49,7 +49,7 @@ function fileEpisodes():Episode[]{
       episodes.push({"id":"bb20-ep67","episodeNo":67,"title":"Bigg Boss 20 — Episode 67","date":"2026-11-11","playerUrl":"https://biggboss20.live/video-player/MmsfVMDJwz2UyfOTrJ7ylT-gcCEUofYvYA4ZQE62iVEb4WKtyUHgtoenn9T4Z8IF-gM5ShQCMZB7apU-0Sc5fi2xna76UT-Flq0Q9FkmZ8X6hNv6YpMlaQXnG3Wh2NEyoF35gkjjln76CjizlcYdRJs6Ac0_J5i2hYh_rTqr0Xos_wobvO4"});
     }
     if (!episodes.some((ep) => ep.episodeNo === 68)) {
-      episodes.push({"id":"bb20-ep68","episodeNo":68,"title":"Bigg Boss 20 — Episode 68","date":"2026-11-12","playerUrl":"https://biggboss20.live/video-player/wokPG6I2hJPgdirNPGwQKERzp46LzqQMv9uYsUPT5nf_ajMPjaT01yxzPJiTcw-9WesZeuL4-bnru7uwXLNWx1ApaMJIUFRnyrS1ckjn3o3lVd2j19qf2d3PXuvz1Www4SrnZDJNAM6WiWUnoiULUQdARLbSzEqaQHZNZtjpAONIj4sPFkc"});
+      episodes.push({"id":"bb20-ep68","episodeNo":68,"title":"Bigg Boss 20 — Episode 68","date":"2026-11-12","playerUrl":"https://biggboss20.live/video-player/DM1XC4XjIxfb9tS2QYRXI7f81vXXp0id6RzhPZBQkmrZYIyke_NicGWZh5KGGkfFjy-D_ugqC-6Ememh9dmzFk62YQzR-7dSShBswCINRX8Oyr1TsCcPY8J18CzsKe3AtiqtOYB7Te1_z-bfPTwTEAD1jAyX_HE64a1ADk1AWoNem_MOISU"});
     }
     if (!episodes.some((ep) => ep.episodeNo === 70)) {
       episodes.push({"id":"bb20-ep70","episodeNo":70,"title":"Bigg Boss 20 — Episode 70","date":"2026-11-14","playerUrl":"https://biggboss20.live/video-player/EySFY-QrtiDOYZKFP_ajhrwX0VngoqEz87ax-Aa-nDtHtU8sO5S3uuZskytOATaFncDKQM86Mq3-C-DqL4Sa9Cix1qEIP1ZLdlTDzCnmK0KuQ3lRDT80_WuX2vWtgXmzj1y2IjuYVuEsVpixheEPwJjgEAvl0Nh_tMLWGGguovqq3nc2Z68"});
@@ -337,7 +337,7 @@ export async function getEpisodes():Promise<Episode[]>{
     ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
-    VALUES ('bb20-ep68', 68, 'Bigg Boss 20 — Episode 68', '2026-11-12', 'https://biggboss20.live/video-player/wokPG6I2hJPgdirNPGwQKERzp46LzqQMv9uYsUPT5nf_ajMPjaT01yxzPJiTcw-9WesZeuL4-bnru7uwXLNWx1ApaMJIUFRnyrS1ckjn3o3lVd2j19qf2d3PXuvz1Www4SrnZDJNAM6WiWUnoiULUQdARLbSzEqaQHZNZtjpAONIj4sPFkc')
+    VALUES ('bb20-ep68', 68, 'Bigg Boss 20 — Episode 68', '2026-11-12', 'https://biggboss20.live/video-player/DM1XC4XjIxfb9tS2QYRXI7f81vXXp0id6RzhPZBQkmrZYIyke_NicGWZh5KGGkfFjy-D_ugqC-6Ememh9dmzFk62YQzR-7dSShBswCINRX8Oyr1TsCcPY8J18CzsKe3AtiqtOYB7Te1_z-bfPTwTEAD1jAyX_HE64a1ADk1AWoNem_MOISU')
     ON CONFLICT (id) DO UPDATE SET player_url = EXCLUDED.player_url, title = EXCLUDED.title, date = EXCLUDED.date`;
 
   await sql`INSERT INTO episodes (id, episode_no, title, date, player_url)
